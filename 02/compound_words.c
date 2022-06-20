@@ -8,8 +8,9 @@
 #define WORD_LENGTH 16
 
 unsigned long oaat(char *key, unsigned long len, unsigned long bits) {
-    unsigned long hash = 0;
-    for (unsigned long i = 0; i < len; i++)
+    unsigned long hash, i;
+    hash = 0;
+    for (i = 0; i < len; i++)
     {
         hash += key[i];
         hash += (hash << 10);
@@ -76,10 +77,11 @@ int in_hash_table(word_node *hash_table[], char *find, unsigned find_len)
 void identify_compound_words(char *words[], word_node *hash_table[], int total_words)
 {
     unsigned len;
-    for (int i = 0; i < total_words; i++)
+    int i, j;
+    for (i = 0; i < total_words; i++)
     {
         len = strlen(words[i]);
-        for (int j = 1; j < len; j++)
+        for (j = 1; j < len; j++)
         {
             if (in_hash_table(hash_table, words[i], j) && in_hash_table(hash_table, &words[i][j], len-j))
             {
@@ -108,16 +110,13 @@ int main(void)
             fprintf(stderr, "malloc error.\n");
             exit(1);
         }
-        // Calculate the hash table key
         length = strlen(word);
         word_code = oaat(word, length, NUM_BITS);
 
-        // Add word to the hash table
         wordptr->next = hash_table[word_code];
         wordptr->word = &words[total];
         hash_table[word_code] = wordptr;
 
-        // Prepare for the next iteration
         word = read_line(WORD_LENGTH);
         total++;
     }
