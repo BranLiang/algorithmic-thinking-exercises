@@ -49,8 +49,8 @@ fn main() {
     handle.read_line(&mut buf).unwrap();
     let case_num: usize = buf.trim().parse().unwrap();
 
-    for i in 0..case_num {
-        println!("Tree {}:", i + 1);
+    for j in 0..case_num {
+        println!("Tree {}:", j + 1);
         let mut people: Vec<Human> = Vec::new();
         let mut scores: Vec<Score> = Vec::new();
         // Parsing the case configuration
@@ -72,7 +72,13 @@ fn main() {
             scores.push(Score { name: person.name.clone(), value });
         }
         // Sort
-        scores.sort_by(|a, b| b.value.cmp(&a.value));
+        scores.sort_by(|a, b| {
+            if a.value != b.value {
+                b.value.cmp(&a.value)
+            } else {
+                a.name.cmp(&b.name)
+            }
+        });
         // Output
         let mut i = 0;
         while i < 3 && i < line_count && scores[i].value > 0 {
@@ -84,7 +90,7 @@ fn main() {
             i += 1;
         }
 
-        if i != case_num - 1 {
+        if j != case_num - 1 {
             println!();
         }
     }
