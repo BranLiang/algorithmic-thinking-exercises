@@ -10,3 +10,4 @@
 ## Ch02 Trees and recursion
 
 - [04 Halloween haul](https://dmoj.ca/problem/dwite12c1p4)
+- [05 Countdown](https://dmoj.ca/problem/ecna05b)
