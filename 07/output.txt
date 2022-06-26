@@ -1,0 +1,9 @@
+Case 1:
+Buy 2 for $22.00
+Buy 4 for $44.00
+Case 2:
+Buy 2 for $46.00
+Case 3:
+Buy 1 for $22.00
+Buy 2 for $22.00
+Buy 3 for $40.00
