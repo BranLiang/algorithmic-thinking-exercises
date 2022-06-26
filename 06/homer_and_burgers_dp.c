@@ -1,14 +1,25 @@
 #include <stdio.h>
 
 #define SIZE 100000
-#define MAX(x, y) ((x)>(y)?(x):(y))
+
+int max(int x, int y)
+{
+    if (x > y)
+    {
+        return x;
+    }
+    else
+    {
+        return y;
+    }
+}
 
 void solve(int m, int n, int t)
 {
-    int result, first, second;
+    int result, i, first, second;
     int dp[SIZE];
     dp[0] = 0;
-    for (int i = 1; i <= t; i++)
+    for (i = 1; i <= t; i++)
     {
         if (i >= m)
         {
@@ -34,7 +45,7 @@ void solve(int m, int n, int t)
         }
         else
         {
-            dp[i] = MAX(first, second) + 1;
+            dp[i] = max(first, second) + 1;
         }
     }
     result = dp[t];
@@ -44,21 +55,23 @@ void solve(int m, int n, int t)
     }
     else
     {
-        int j = t;
-        do
+        i = t - 1;
+        result = dp[i];
+        while (result == -1)
         {
-            j--;
-            result = dp[j];
-        } while (result == -1);
-        printf("%d %d\n", result, t - j);
+            i--;
+            result = dp[i];
+        }
+        printf("%d %d\n", result, t - i);
     }
 }
 
 int main(void)
 {
     int m, n, t;
-    while (scanf("%d %d %d", &m, &n, &t) != EOF)
+    while (scanf("%d %d %d", &m, &n, &t) != -1)
     {
         solve(m, n, t);
     }
+    return 0;
 }
