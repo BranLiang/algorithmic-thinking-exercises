@@ -11,3 +11,6 @@
 
 - [04 Halloween haul](https://dmoj.ca/problem/dwite12c1p4)
 - [05 Countdown](https://dmoj.ca/problem/ecna05b)
+
+# Ch03 Memorization and dynamic programming
+- [06 Homer Simpson](https://onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1406)
