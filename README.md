@@ -15,3 +15,4 @@
 ## Ch03 Memorization and dynamic programming
 - [06 Homer Simpson](https://onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1406)
 - [07 Moneygrubber](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1921)
+- [08 Hockey rivalry](https://dmoj.ca/problem/cco18p1)
