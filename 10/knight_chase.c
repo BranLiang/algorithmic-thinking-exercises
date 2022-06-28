@@ -43,19 +43,16 @@ void add_position(board chess, position from, position p, position current[], in
     }
 }
 
-int find_distance(position start, position dest, board chess)
+int find_distance(position start, position dest, board chess, int moves[MAX_ROWS + 1][MAX_COLS + 1])
 {
+    if (moves[dest.row][dest.col] != -1)
+    {
+        return moves[dest.row][dest.col];
+    }
+    
     positions current_postions, new_postions;
     int current_size, new_size;
-    int moves[MAX_ROWS + 1][MAX_COLS + 1];
-    // Initialize the moves data
-    for (int row = 1; row <= MAX_ROWS; row++)
-    {
-        for (int col = 1; col < MAX_COLS; col++)
-        {
-            moves[row][col] = -1;
-        }
-    }
+
     // It takes 0 move from start to start
     moves[start.row][start.col] = 0;
     // Push the start postion to the current
@@ -95,10 +92,20 @@ void solve(position knight, position pawn, board chess)
     current_pawn.col = pawn.col;
     current_pawn.row = pawn.row;
 
+    int moves[MAX_ROWS + 1][MAX_COLS + 1];
+    // Initialize the moves data
+    for (int row = 1; row <= MAX_ROWS; row++)
+    {
+        for (int col = 1; col < MAX_COLS; col++)
+        {
+            moves[row][col] = -1;
+        }
+    }
+
     num_moves = 0;
     while (current_pawn.row < chess.rows)
     {
-        knight_takes = find_distance(knight, current_pawn, chess);
+        knight_takes = find_distance(knight, current_pawn, chess, moves);
         if (knight_takes >= 0 && num_moves >= knight_takes && (num_moves - knight_takes) % 2 == 0)
         {
             printf("Win in %d knight move(s).\n", num_moves);
@@ -114,7 +121,7 @@ void solve(position knight, position pawn, board chess)
     {
         dest.col = current_pawn.col;
         dest.row = current_pawn.row + 1;
-        knight_takes = find_distance(knight, dest, chess);
+        knight_takes = find_distance(knight, dest, chess, moves);
         if (knight_takes >= 0 && num_moves >= knight_takes && (num_moves - knight_takes) % 2 == 0)
         {
             printf("Stalemate in %d knight move(s).\n", num_moves);
