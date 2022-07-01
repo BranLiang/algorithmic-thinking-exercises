@@ -22,3 +22,6 @@
 - [10 Knight chase](https://dmoj.ca/problem/ccc99s4)
 - [11 Rope climb](https://dmoj.ca/problem/wc18c1s3)
 - [12 Book translation](https://dmoj.ca/problem/ecna16d)
+
+## Ch05 Shortest paths in weighted graphq
+- [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
