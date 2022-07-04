@@ -26,3 +26,6 @@
 ## Ch05 Shortest paths in weighted graphq
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
 - [14 Grandma planner](https://dmoj.ca/problem/saco08p3)
+
+## Ch06 Binary search
+- [15 Feeding ants](https://dmoj.ca/problem/coci14c4p4)
