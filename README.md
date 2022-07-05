@@ -1,32 +1,33 @@
 # Algorithmic thinking exercises
 
-## Ch01 Hashtable
+## Hashtable
 
 - [00 Food line](https://dmoj.ca/problem/lkp18c2p1)
 - [01 Snowflakes](https://dmoj.ca/problem/cco07p2)
 - [02 Compound words](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1332)
 - [03 Spelling check](https://codeforces.com/problemset/problem/39/J)
 
-## Ch02 Trees and recursion
+## Trees and recursion
 
 - [04 Halloween haul](https://dmoj.ca/problem/dwite12c1p4)
 - [05 Countdown](https://dmoj.ca/problem/ecna05b)
 
-## Ch03 Memorization and dynamic programming
+## Memorization and dynamic programming
 - [06 Homer Simpson](https://onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1406)
 - [07 Moneygrubber](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1921)
 - [08 Hockey rivalry](https://dmoj.ca/problem/cco18p1)
 - [09 Ways to pass](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1851)
 
-## Ch04 Graphs and breadth first search
+## Graphs and breadth first search
 - [10 Knight chase](https://dmoj.ca/problem/ccc99s4)
 - [11 Rope climb](https://dmoj.ca/problem/wc18c1s3)
 - [12 Book translation](https://dmoj.ca/problem/ecna16d)
 
-## Ch05 Shortest paths in weighted graphq
+## Shortest paths in weighted graphq
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
 - [14 Grandma planner](https://dmoj.ca/problem/saco08p3)
 
-## Ch06 Binary search
+## Binary search
 - [15 Feeding ants](https://dmoj.ca/problem/coci14c4p4)
-- [16 River  jump](http://poj.org/problem?id=3258)
+- [16 River jump](http://poj.org/problem?id=3258)
+- [17 Living quality](https://dmoj.ca/problem/ioi10p3)
