@@ -32,3 +32,6 @@
 - [16 River jump](http://poj.org/problem?id=3258)
 - [17 Living quality](https://dmoj.ca/problem/ioi10p3)
 - [18 Cave doors](https://dmoj.ca/problem/ioi13p4)
+
+## Heaps and segment trees
+- [19 Supermarket promotion](https://www.spoj.com/problems/PRO/)
