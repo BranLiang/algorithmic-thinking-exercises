@@ -35,3 +35,4 @@
 
 ## Heaps and segment trees
 - [19 Supermarket promotion](https://www.spoj.com/problems/PRO/)
+- [20 Building treaps](http://poj.org/problem?id=1785)
