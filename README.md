@@ -37,3 +37,6 @@
 - [19 Supermarket promotion](https://www.spoj.com/problems/PRO/)
 - [20 Building treaps](http://poj.org/problem?id=1785)
 - [21 Two sum](https://www.spoj.com/problems/KGSS/)
+
+## Union find
+- [22 Social network](https://www.spoj.com/problems/SOCNETC/)
