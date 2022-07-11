@@ -4,11 +4,20 @@
 
 int find_community(int community_of[], int x)
 {
-    int community = community_of[x];
+    int community = x, temp;
     while (community != community_of[community])
     {
         community = community_of[community];
     }
+
+    // Path compression
+    while (x != community)
+    {
+        temp = community_of[x];
+        community_of[x] = community;
+        x = temp;
+    }
+
     return community;
 }
 
@@ -27,8 +36,16 @@ void union_communities(int community_of[], int x, int y, int size[], int max_siz
         return;
     }
     
-    community_of[community_a] = community_b;
-    size[community_b] += size[community_a];
+    if (size[community_a] > size[community_b])
+    {
+        community_of[community_b] = community_a;
+        size[community_a] += size[community_b];
+    }
+    else
+    {
+        community_of[community_a] = community_b;
+        size[community_b] += size[community_a];
+    }
 }
 
 int main(void)
