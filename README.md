@@ -41,3 +41,4 @@
 ## Union find
 - [22 Social network](https://www.spoj.com/problems/SOCNETC/)
 - [23 Friends and enemies](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1099)
+- [24 Drawer chore](https://open.kattis.com/problems/ladice)
