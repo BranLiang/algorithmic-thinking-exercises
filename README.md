@@ -23,7 +23,7 @@
 - [11 Rope climb](https://dmoj.ca/problem/wc18c1s3)
 - [12 Book translation](https://dmoj.ca/problem/ecna16d)
 
-## Shortest paths in weighted graphq
+## Shortest paths in weighted graph
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
 - [14 Grandma planner](https://dmoj.ca/problem/saco08p3)
 
@@ -40,3 +40,4 @@
 
 ## Union find
 - [22 Social network](https://www.spoj.com/problems/SOCNETC/)
+- [23 Friends and enemies](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1099)
