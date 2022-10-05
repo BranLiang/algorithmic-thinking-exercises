@@ -22,6 +22,7 @@
 - [10 Knight chase](https://dmoj.ca/problem/ccc99s4)
 - [11 Rope climb](https://dmoj.ca/problem/wc18c1s3)
 - [12 Book translation](https://dmoj.ca/problem/ecna16d)
+- [25 Pursuit of Knowledge](https://dmoj.ca/problem/gfssoc1j5)
 
 ## Shortest paths in weighted graph
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
@@ -42,3 +43,5 @@
 - [22 Social network](https://www.spoj.com/problems/SOCNETC/)
 - [23 Friends and enemies](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1099)
 - [24 Drawer chore](https://open.kattis.com/problems/ladice)
+
+## Uncategorized
