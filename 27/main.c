@@ -3,12 +3,6 @@
 
 #define MAX_N 100001
 
-typedef struct {
-    int from;
-    int to;
-    int length;
-} path;
-
 typedef struct node {
     int weight;
     int to;
@@ -24,16 +18,7 @@ void add_node(int from, int to, int weight, node *tree[MAX_N])
     tree[from] = new_node;    
 }
 
-int not_the_same_path(int from, int to, path *path)
-{
-    if (from == path->to && to == path->from)
-    {
-        return 0;
-    }
-    return 1;
-}
-
-void find_longest_path(int start, node *tree[MAX_N], path *longest, path *second_longest)
+void find_longest_path(int start, node *tree[MAX_N], int *longest, int *second_longest)
 {
     int current_size, new_size;
     int current_locations[MAX_N], new_locations[MAX_N];
@@ -55,20 +40,14 @@ void find_longest_path(int start, node *tree[MAX_N], path *longest, path *second
                 if (distances[to] == -1)
                 {
                     int new_distance = distances[current_locations[i]] + location->weight;
-                    if (new_distance >= longest->length && not_the_same_path(start, to, longest))
+                    if (new_distance >= *longest && to > start)
                     {
-                        second_longest->from = start;
-                        second_longest->to = longest->to;
-                        second_longest->length = longest->length;
-                        longest->from = start;
-                        longest->to = to;
-                        longest->length = new_distance;
+                        *second_longest = *longest;
+                        *longest = new_distance;
                     }
-                    else if (new_distance > second_longest->length && not_the_same_path(start, to, second_longest) && not_the_same_path(start, to, longest))
+                    else if (new_distance > *second_longest && to > start)
                     {
-                        second_longest->from = start;
-                        second_longest->to = to;
-                        second_longest->length = new_distance;
+                        *second_longest = new_distance;
                     }
                     
                     distances[to] = new_distance;
@@ -85,18 +64,13 @@ void find_longest_path(int start, node *tree[MAX_N], path *longest, path *second
             current_locations[j] = new_locations[j];
         }
     }
-    
 }
 
 int main(void)
 {
-    path longest, second_longest;
-    longest.length = 0;
-    longest.from = -1;
-    longest.to = -1;
-    second_longest.length = 0;
-    second_longest.from = -1;
-    second_longest.to = -1;
+    int longest, second_longest;
+    longest = 0;
+    second_longest = 0;
 
     int n, a, b, weight;
     scanf("%d", &n);
@@ -109,7 +83,7 @@ int main(void)
         add_node(a, b, weight, tree);
         add_node(b, a, weight, tree);
     }
-    
+
     for (int i = 1; i <= n; i++)
     {
         find_longest_path(i, tree, &longest, &second_longest);
@@ -120,5 +94,5 @@ int main(void)
     // printf("2 From: %d\n", second_longest.from);
     // printf("2 To: %d\n", second_longest.to);
     // printf("2 Length: %d\n", second_longest.length);
-    printf("%d\n", second_longest.length);
+    printf("%d\n", second_longest);
 }
