@@ -25,6 +25,7 @@
 ## Shortest paths in weighted graph
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
 - [14 Grandma planner](https://dmoj.ca/problem/saco08p3)
+- [27 Third Place](https://dmoj.ca/problem/dmopc17c4p3)
 
 ## Binary search
 - [15 Feeding ants](https://dmoj.ca/problem/coci14c4p4)
