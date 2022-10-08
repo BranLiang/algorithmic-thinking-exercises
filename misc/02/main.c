@@ -27,7 +27,7 @@ int hash(char *key)
     return hash % MAX_SIZE;
 }
 
-void *get(time_map *obj, char *key, int timestamp, char *value)
+void get(time_map *obj, char *key, int timestamp, char *value)
 {
     int index = hash(key);
 
