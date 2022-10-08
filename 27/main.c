@@ -88,11 +88,6 @@ int main(void)
     {
         find_longest_path(i, tree, &longest, &second_longest);
     }
-    // printf("1 From: %d\n", longest.from);
-    // printf("1 To: %d\n", longest.to);
-    // printf("1 Length: %d\n", longest.length);
-    // printf("2 From: %d\n", second_longest.from);
-    // printf("2 To: %d\n", second_longest.to);
-    // printf("2 Length: %d\n", second_longest.length);
+
     printf("%d\n", second_longest);
 }
