@@ -1,0 +1,9 @@
+5
+foo low 1
+bar yoo 1
+ofo loo 3
+foo high 5
+bar baz 7
+2
+foo 2
+bar 7
