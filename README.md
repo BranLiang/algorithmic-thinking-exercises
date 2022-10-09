@@ -46,5 +46,8 @@
 ## Math
 - [28 Divide and Mod](https://dmoj.ca/problem/divmod)
 
+## Data structure
+- [29 Lozinke](https://dmoj.ca/problem/coci17c1p3hard)
+
 ## Uncategorized
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
