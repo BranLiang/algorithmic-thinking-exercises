@@ -1,6 +1,7 @@
 use std::io;
 use std::collections::HashMap;
 
+#[derive(Debug, Clone, Copy)]
 struct Path {
     to: usize,
     distance: usize,
@@ -67,9 +68,8 @@ fn longest_route(through: usize, paths: &HashMap<usize, Vec<Path>>, cache: &mut 
     }
 }
 
-fn find_longest_route(n: usize, paths: &HashMap<usize, Vec<Path>>) -> (usize, Route) {
+fn find_longest_route(n: usize, paths: &HashMap<usize, Vec<Path>>) -> Route {
     let mut cache = HashMap::new();
-    let mut through = 0;
     let mut max = Route {
         from: 0,
         to: 0,
@@ -79,31 +79,67 @@ fn find_longest_route(n: usize, paths: &HashMap<usize, Vec<Path>>) -> (usize, Ro
         let route = longest_route(i, paths, &mut cache);
         if route.distance > max.distance {
             max = route;
-            through = i;
         }
     }
-    (through, max)
+    max
 }
 
-fn remove_path(paths: &mut HashMap<usize, Vec<Path>>, from: usize, to: usize) {
+fn remove_path(paths: &mut HashMap<usize, Vec<Path>>, from: Option<usize>, to: usize) {
     let mut i = 0;
-    for path in paths.get_mut(&from).unwrap() {
-        if path.to == to {
-            paths.get_mut(&from).unwrap().remove(i);
-            break;
+    match from {
+        Some(from) => {
+            let paths = paths.get_mut(&from).unwrap();
+            while i < paths.len() {
+                if paths[i].to == to {
+                    paths.remove(i);
+                    break;
+                }
+                i += 1;
+            }
+        },
+        None => {
+            paths.get_mut(&to).unwrap().clear();
+            paths.entry(to).or_insert(Vec::new());
         }
-        i += 1;
+    }
+}
+
+
+fn solve(n: usize, paths: &mut HashMap<usize, Vec<Path>>, lookup: &HashMap<usize, usize>, cloned_paths: &mut HashMap<usize, Vec<Path>>) {
+    let route = find_longest_route(n, paths);
+
+    match lookup.get(&route.from) {
+        Some(&from) => remove_path(paths, Some(from), route.from),
+        // If not found, it's the root node
+        None => remove_path(paths, None, route.from),
+    }
+
+    let route_a = find_longest_route(n, paths);
+
+    match lookup.get(&route.to) {
+        Some(&to) => remove_path(cloned_paths, Some(to), route.to),
+        // If not found, it's the root node
+        None => remove_path(cloned_paths, None, route.to),
+    }
+
+    let route_b = find_longest_route(n, cloned_paths);
+    if route_a.distance > route_b.distance {
+        println!("{}", route_a.distance);
+    } else {
+        println!("{}", route_b.distance);
     }
 }
 
 fn main() -> io::Result<()> {
     let mut buf = String::new();
     let mut paths = HashMap::new();
+    let mut cloned_paths = HashMap::new();
+    let mut lookup = HashMap::new();
 
     io::stdin().read_line(&mut buf)?;
     let n: usize = buf.trim().parse().unwrap();
 
-    for _ in 0..n {
+    for _ in 1..n {
         buf.clear();
         io::stdin().read_line(&mut buf)?;
         let mut iter = buf.split_whitespace();
@@ -111,7 +147,13 @@ fn main() -> io::Result<()> {
         let to: usize = iter.next().unwrap().parse().unwrap();
         let distance: usize = iter.next().unwrap().parse().unwrap();
         paths.entry(from).or_insert(Vec::new()).push(Path { to, distance });
+        paths.entry(to).or_insert(Vec::new());
+        cloned_paths.entry(from).or_insert(Vec::new()).push(Path { to, distance });
+        cloned_paths.entry(to).or_insert(Vec::new());
+        lookup.insert(to, from);
     }
+
+    solve(n, &mut paths, &lookup, &mut cloned_paths);
 
     Ok(())
 }
