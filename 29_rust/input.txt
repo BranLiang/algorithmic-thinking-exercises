@@ -1,0 +1,6 @@
+5
+1 aaa
+2 aa
+1 aa
+2 aa
+1 abb
