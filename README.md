@@ -5,6 +5,7 @@
 - [01 Snowflakes](https://dmoj.ca/problem/cco07p2)
 - [02 Compound words](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1332)
 - [03 Spelling check](https://codeforces.com/problemset/problem/39/J)
+- [29 Lozinke](https://dmoj.ca/problem/coci17c1p3hard)
 
 ## Trees and recursion
 - [04 Halloween haul](https://dmoj.ca/problem/dwite12c1p4)
@@ -45,9 +46,6 @@
 
 ## Math
 - [28 Divide and Mod](https://dmoj.ca/problem/divmod)
-
-## Data structure
-- [29 Lozinke](https://dmoj.ca/problem/coci17c1p3hard)
 
 ## Uncategorized
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
