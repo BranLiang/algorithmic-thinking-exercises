@@ -11,3 +11,7 @@ Implement a datastructure called TimeMap with two operations: `get(key, timestam
 ## 03
 
 Implement a datastructure which supports calculating the median of a stream of integers. The datastructure should support two operations `addNum(num)` and `findMedian()`. `addNum` adds another number to your data, while `findMedian` should find the median of all numbers that have been added so far.
+
+## 04
+
+[Cherry Pickup](https://leetcode.com/problems/cherry-pickup/)

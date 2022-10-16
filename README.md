@@ -46,6 +46,4 @@
 
 ## Math
 - [28 Divide and Mod](https://dmoj.ca/problem/divmod)
-
-## Uncategorized
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
