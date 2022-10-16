@@ -44,6 +44,7 @@
 - [23 Friends and enemies](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1099)
 - [24 Drawer chore](https://open.kattis.com/problems/ladice)
 
-## Math
+## Simple Math
 - [28 Divide and Mod](https://dmoj.ca/problem/divmod)
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
+- [30 Pop Explosion](https://dmoj.ca/problem/p154ex6)
