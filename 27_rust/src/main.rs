@@ -1,6 +1,6 @@
 use std::io::{self, StdinLock};
 use std::io::BufRead;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 type Map = HashMap<usize, Vec<Edge>>;
 
@@ -17,25 +17,32 @@ struct Route {
     distance: usize,
 }
 
-fn parse(line: &str) -> (usize, Edge) {
+fn parse(line: &str, nodes: &HashSet<usize>) -> (usize, Edge) {
     let mut parts = line.split_whitespace();
 
     let from = parts.next().unwrap().parse::<usize>().unwrap();
     let to = parts.next().unwrap().parse::<usize>().unwrap();
     let length = parts.next().unwrap().parse::<usize>().unwrap();
 
-    if from < to {
-        (from, Edge { to, length })
-    } else {
-        (to, Edge { to: from, length })
+    if nodes.contains(&from) && !nodes.contains(&to) {
+        return (from, Edge { to, length });
     }
+    if nodes.contains(&to) && !nodes.contains(&from) {
+        return (to, Edge { to: from, length });
+    }
+    if from < to {
+        return (from, Edge { to, length });
+    }
+    (to, Edge { to: from, length })
 }
 
-fn load(handle: &mut StdinLock, edges: &mut Map, parents: &mut HashMap<usize, usize>) {
+fn load(handle: &mut StdinLock, edges: &mut Map, parents: &mut HashMap<usize, usize>, nodes: &mut HashSet<usize>) {
     for line in handle.lines() {
         let line = line.unwrap();
-        let (from, edge) = parse(&line);
+        let (from, edge) = parse(&line, &nodes);
         let to = edge.to;
+        nodes.insert(from);
+        nodes.insert(to);
         edges.entry(from).or_insert(Vec::new()).push(edge);
         parents.insert(to, from);
     }
@@ -139,6 +146,7 @@ fn find_second_longest(n: usize, edges: &mut Map, parents: &HashMap<usize, usize
 fn main() -> io::Result<()> {
     let mut edges = HashMap::new();
     let mut parents = HashMap::new();
+    let mut nodes = HashSet::new();
 
     let mut handle = io::stdin().lock();
 
@@ -148,7 +156,7 @@ fn main() -> io::Result<()> {
     let n = buf.trim().parse::<usize>().unwrap();
 
     // Load edges and parents
-    load(&mut handle, &mut edges, &mut parents);
+    load(&mut handle, &mut edges, &mut parents, &mut nodes);
     
     println!("{}", find_second_longest(n, &mut edges, &parents));
 
@@ -162,7 +170,9 @@ mod tests {
     #[test]
     fn test_parse() {
         let line = "1 2 3";
-        let (from, edge) = parse(line);
+        let mut nodes = HashSet::new();
+        nodes.insert(1);
+        let (from, edge) = parse(line, &nodes);
         assert_eq!(from, 1);
         assert_eq!(edge.to, 2);
         assert_eq!(edge.length, 3);
@@ -243,7 +253,7 @@ mod tests {
         parents.insert(4, 2);
         parents.insert(5, 4);
         let distance = find_second_longest(5, &mut edges, &parents);
-        assert_eq!(distance, 4);
+        assert_eq!(distance, 5);
     }
 
     #[test]
