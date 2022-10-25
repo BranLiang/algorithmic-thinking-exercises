@@ -46,15 +46,16 @@ fn load_stores(stores: &mut HashSet<usize>) {
 type Bought = bool;
 type Dest = usize;
 type Distance = usize;
+type Count = usize;
 
-fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize) -> HashMap<(Dest, Bought), Distance> {
-    let mut state_distances: HashMap<(Dest, Bought), Distance> = HashMap::new();
+fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize) -> HashMap<(Dest, Bought), (Distance, Count)> {
+    let mut state_distances: HashMap<(Dest, Bought), (Distance, Count)> = HashMap::new();
     let mut locked: HashSet<(Dest, Bought)> = HashSet::new();
 
     // Definition for the bool key:
     // false means cookie not bought
     // true means cookie bought
-    state_distances.insert((from, false), 0);
+    state_distances.insert((from, false), (0, 1));
 
     let mut cur_locations = HashSet::new();
     cur_locations.insert((from, false));
@@ -69,16 +70,17 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
             let mut counter = 0;
             let cur_distance: usize;
             {
-                cur_distance = *state_distances.get(&(*location, *bought)).unwrap();
+                let (distance, _) = *state_distances.get(&(*location, *bought)).unwrap();
+                cur_distance = distance;
             }
             for path in map.get(&location).unwrap() {
+                let new_distance = cur_distance + path.distance;
                 let bought = *bought || stores.contains(&path.to);
-                // Ignore locked path states
+
                 if locked.contains(&(path.to, bought)) {
                     continue;
                 }
                 counter += 1;
-                let new_distance = cur_distance + path.distance;
 
                 // Find the minimum distance for that round
                 if bought {
@@ -106,15 +108,15 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
                 }
 
                 // Update the distance if it's lower
-                match state_distances.get(&(path.to, bought)) {
-                    Some(distance) => {
-                        if new_distance < *distance {
-                            state_distances.insert((path.to, bought), new_distance);
-                        }
-                    },
-                    _ => {
-                        state_distances.insert((path.to, bought), new_distance);
+                if let Some((distance, count)) = state_distances.get_mut(&(path.to, bought)) {
+                    if *distance > new_distance {
+                        *distance = new_distance;
+                        *count = 1;
+                    } else if *distance == new_distance {
+                        *count += 1;
                     }
+                } else {
+                    state_distances.insert((path.to, bought), (new_distance, 1));
                 }
             }
 
