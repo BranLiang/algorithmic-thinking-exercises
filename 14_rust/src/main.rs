@@ -27,7 +27,6 @@ fn load_distances(map: &mut HashMap<usize, Vec<Path>>, n: usize) {
             }
             let distance = distance.parse().unwrap();
             map.entry(from).or_insert_with(Vec::new).push(Path { to, distance });
-            map.entry(to).or_insert_with(Vec::new).push(Path { to: from, distance });
         }
     }
 }
@@ -44,6 +43,7 @@ fn load_stores(stores: &mut HashSet<usize>) {
 }
 
 type Bought = bool;
+type From = usize;
 type Dest = usize;
 type Distance = usize;
 type Count = usize;
@@ -51,13 +51,12 @@ type Count = usize;
 fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize) -> HashMap<(Dest, Bought), (Distance, Count)> {
     let mut state_distances: HashMap<(Dest, Bought), (Distance, Count)> = HashMap::new();
     let mut locked: HashSet<(Dest, Bought)> = HashSet::new();
+    let mut new_nodes: HashSet<(From, Bought)> = HashSet::new();
+    new_nodes.insert((from, false));
 
-    // Definition for the bool key:
-    // false means cookie not bought
-    // true means cookie bought
     state_distances.insert((from, false), (0, 1));
 
-    let mut cur_locations = HashSet::new();
+    let mut cur_locations: HashSet<(From, Bought)> = HashSet::new();
     cur_locations.insert((from, false));
 
     while !cur_locations.is_empty() {
@@ -67,6 +66,8 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
         let mut min_with_cookie_distance: Option<(Dest, Distance)> = None;
 
         for (location, bought) in cur_locations.iter() {
+            let is_new = new_nodes.contains(&(*location, *bought));
+
             let mut counter = 0;
             let cur_distance: usize;
             {
@@ -108,15 +109,17 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
                 }
 
                 // Update the distance if it's lower
-                if let Some((distance, count)) = state_distances.get_mut(&(path.to, bought)) {
-                    if *distance > new_distance {
-                        *distance = new_distance;
-                        *count = 1;
-                    } else if *distance == new_distance {
-                        *count += 1;
+                if is_new {
+                    if let Some((distance, count)) = state_distances.get_mut(&(path.to, bought)) {
+                        if *distance > new_distance {
+                            *distance = new_distance;
+                            *count = 1;
+                        } else if *distance == new_distance {
+                            *count += 1;
+                        }
+                    } else {
+                        state_distances.insert((path.to, bought), (new_distance, 1));
                     }
-                } else {
-                    state_distances.insert((path.to, bought), (new_distance, 1));
                 }
             }
 
@@ -129,15 +132,21 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
             cur_locations.remove(&(location, bought));
         }
 
+        new_nodes.clear();
+
         if let Some((location, _)) = min_non_cookie_distance {
             cur_locations.insert((location, false));
             locked.insert((location, false));
+            new_nodes.insert((location, false));
         }
 
         if let Some((location, _)) = min_with_cookie_distance {
             cur_locations.insert((location, true));
             locked.insert((location, true));
+            new_nodes.insert((location, true));
         }
+
+        println!("cur_locations: {:?}", cur_locations);
     }
 
     state_distances
@@ -153,39 +162,10 @@ fn main() {
     load_stores(&mut stores);
 
     let min_distances_from_start = load_min_distances(&map, &stores, 1);
-    let min_distances_from_end = load_min_distances(&map, &stores, n);
 
-    println!("{:?}", min_distances_from_start);
-    println!("{:?}", min_distances_from_end);
+    println!("min_distances_from_start: {:?}", min_distances_from_start);
 
-    // let mut distances = Vec::new();
-    // for ((to, bought), distance1) in min_distances_from_start {
-    //     if to == n {
-    //         continue;
-    //     }
-    //     if bought {
-    //         match min_distances_from_end.get(&(to, bought)) {
-    //             Some(distance2) => {
-    //                 distances.push(distance1 + distance2);
-    //             },
-    //             _ => {}
-    //         }
-    //     }
-    //     match min_distances_from_end.get(&(to, !bought)) {
-    //         Some(distance2) => {
-    //             distances.push(distance1 + distance2);
-    //         },
-    //         _ => {}
-    //     }
-    // }
-    // distances.sort();
-    // let mut routes_count = 0;
-    // let min_distance = distances[0];
-    // for distance in distances {
-    //     if distance > min_distance {
-    //         break;
-    //     }
-    //     routes_count += 1; 
-    // }
-    // println!("{} {}", min_distance, routes_count %  1000000);
+    min_distances_from_start.get(&(n, true)).map(|(distance, count)| {
+        println!("{} {}", distance, count);
+    });
 }
