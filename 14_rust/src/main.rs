@@ -42,116 +42,80 @@ fn load_stores(stores: &mut HashSet<usize>) {
     }
 }
 
-type Bought = bool;
-type From = usize;
-type Dest = usize;
-type Distance = usize;
-type Count = usize;
+fn solve(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize, n: usize){
+    let mut distances: [HashMap<usize, usize>; 2] = [HashMap::new(), HashMap::new()];
+    let mut counts: [HashMap<usize, usize>; 2] = [HashMap::new(), HashMap::new()];
+    // HashSet<(location_num, with_or_not)>
+    // with_or_not: 0 -> no cookie, 1 -> with cookie
+    let mut locked: HashSet<(usize, usize)> = HashSet::new();
 
-fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize) -> HashMap<(Dest, Bought), (Distance, Count)> {
-    let mut state_distances: HashMap<(Dest, Bought), (Distance, Count)> = HashMap::new();
-    let mut locked: HashSet<(Dest, Bought)> = HashSet::new();
-    let mut new_nodes: HashSet<(From, Bought)> = HashSet::new();
-    new_nodes.insert((from, false));
+    // Initialize
+    distances[0].insert(from, 0);
+    counts[0].insert(from, 1);
 
-    state_distances.insert((from, false), (0, 1));
+    let states: [usize; 2] = [0, 1];
 
-    let mut cur_locations: HashSet<(From, Bought)> = HashSet::new();
-    cur_locations.insert((from, false));
+    loop {
+        for state in states {
+            let mut min_distance = usize::max_value();
+            let mut min_location = 0;
 
-    while !cur_locations.is_empty() {
-        let mut remove_locations = Vec::new();
-
-        let mut min_non_cookie_distance: Option<(Dest, Distance)> = None;
-        let mut min_with_cookie_distance: Option<(Dest, Distance)> = None;
-
-        for (location, bought) in cur_locations.iter() {
-            let is_new = new_nodes.contains(&(*location, *bought));
-
-            let mut counter = 0;
-            let cur_distance: usize;
-            let cur_count: usize;
-            {
-                let (distance, count) = *state_distances.get(&(*location, *bought)).unwrap();
-                cur_distance = distance;
-                cur_count = count;
-            }
-            for path in map.get(&location).unwrap() {
-                let bought = *bought || stores.contains(&path.to);
-                
-                if locked.contains(&(path.to, bought)) {
-                    continue;
+            for (location, distance) in distances[state].iter() {
+                if *distance < min_distance && !locked.contains(&(*location, state)) {
+                    min_distance = *distance;
+                    min_location = *location;
                 }
-                counter += 1;
-                let new_distance = cur_distance + path.distance;
-                
-                // Find the minimum distance for that round
-                if bought {
-                    match min_with_cookie_distance {
-                        Some((_, min)) => {
-                            if new_distance < min {
-                                min_with_cookie_distance = Some((path.to, new_distance));
+            }
+
+            if min_location == 0 {
+                continue;
+            }
+
+            locked.insert((min_location, state));
+
+            let count = counts[state].get(&min_location).unwrap().clone();
+
+            if state == 0 && stores.contains(&min_location) {
+                let distance = distances[0].get(&min_location).unwrap().clone();
+                distances[1].insert(min_location, distance);
+                counts[1].insert(min_location, count);
+            } else {
+                let paths = map.get(&min_location).unwrap();
+
+                for path in paths {
+                    let new_distance = min_distance + path.distance;
+
+                    match distances[state].get_mut(&path.to) {
+                        Some(distance) => {
+                            if new_distance < *distance {
+                                *distance = new_distance;
+                                counts[state].insert(path.to, count);
+                            } else if new_distance == *distance {
+                                let new_count = counts[state].get(&path.to).unwrap() + count;
+                                let new_count = new_count % 1000000 ;
+                                counts[state].insert(path.to, new_count);
                             }
-                        },
-                        _ => {
-                            min_with_cookie_distance = Some((path.to, new_distance));
                         }
-                    }
-                } else {
-                    match min_non_cookie_distance {
-                        Some((_, min)) => {
-                            if new_distance < min {
-                                min_non_cookie_distance = Some((path.to, new_distance));
-                            }
-                        },
-                        _ => {
-                            min_non_cookie_distance = Some((path.to, new_distance));
+                        None => {
+                            distances[state].insert(path.to, new_distance);
+                            counts[state].insert(path.to, count);
                         }
-                    }
-                }
-
-                // Update the distance if it's lower
-                if is_new {
-                    if let Some((distance, count)) = state_distances.get_mut(&(path.to, bought)) {
-                        if *distance > new_distance {
-                            *distance = new_distance;
-                            *count = cur_count;
-                        } else if *distance == new_distance {
-                            *count += cur_count;
-                            *count %= 1000000;
-                        }
-                    } else {
-                        state_distances.insert((path.to, bought), (new_distance, cur_count));
                     }
                 }
             }
 
-            if counter == 0 {
-                remove_locations.push((*location, *bought));
-            }
         }
 
-        for (location, bought) in remove_locations {
-            cur_locations.remove(&(location, bought));
-        }
-
-        new_nodes.clear();
-
-        if let Some((location, _)) = min_non_cookie_distance {
-            cur_locations.insert((location, false));
-            locked.insert((location, false));
-            new_nodes.insert((location, false));
-        }
-
-        if let Some((location, _)) = min_with_cookie_distance {
-            cur_locations.insert((location, true));
-            locked.insert((location, true));
-            new_nodes.insert((location, true));
+        if locked.contains(&(n, 1)) {
+            break;
         }
     }
 
-    state_distances
+    let distance = distances[1].get(&n).unwrap();
+    let count = counts[1].get(&n).unwrap();
+    println!("{} {}", distance, count);
 }
+
 
 fn main() {
     let n = parse_number();
@@ -162,9 +126,5 @@ fn main() {
     let mut stores = HashSet::new();
     load_stores(&mut stores);
 
-    let min_distances_from_start = load_min_distances(&map, &stores, 1);
-
-    min_distances_from_start.get(&(n, true)).map(|(distance, count)| {
-        println!("{} {}", distance, count);
-    });
+    solve(&map, &stores, 1, n);
 }
