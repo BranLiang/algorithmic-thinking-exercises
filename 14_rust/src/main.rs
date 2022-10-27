@@ -55,8 +55,8 @@ fn solve(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize, 
 
     let states: [usize; 2] = [0, 1];
 
-    loop {
-        for state in states {
+    for state in states {
+        loop {
             let mut min_distance = usize::max_value();
             let mut min_location = 0;
 
@@ -68,7 +68,7 @@ fn solve(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize, 
             }
 
             if min_location == 0 {
-                continue;
+                break;
             }
 
             locked.insert((min_location, state));
@@ -76,9 +76,22 @@ fn solve(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize, 
             let count = counts[state].get(&min_location).unwrap().clone();
 
             if state == 0 && stores.contains(&min_location) {
-                let distance = distances[0].get(&min_location).unwrap().clone();
-                distances[1].insert(min_location, distance);
-                counts[1].insert(min_location, count);
+                match distances[1].get_mut(&min_location) {
+                    Some(distance) => {
+                        if min_distance < *distance {
+                            *distance = min_distance;
+                            counts[1].insert(min_location, count);
+                        } else if min_distance == *distance {
+                            let new_count = counts[1].get(&min_location).unwrap() + count;
+                            let new_count = new_count % 1000000;
+                            counts[1].insert(min_location, new_count);
+                        }
+                    },
+                    None => {
+                        distances[1].insert(min_location, min_distance);
+                        counts[1].insert(min_location, count);
+                    }
+                }
             } else {
                 let paths = map.get(&min_location).unwrap();
 
@@ -103,11 +116,6 @@ fn solve(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, from: usize, 
                     }
                 }
             }
-
-        }
-
-        if locked.contains(&(n, 1)) {
-            break;
         }
     }
 
