@@ -70,19 +70,21 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
 
             let mut counter = 0;
             let cur_distance: usize;
+            let cur_count: usize;
             {
-                let (distance, _) = *state_distances.get(&(*location, *bought)).unwrap();
+                let (distance, count) = *state_distances.get(&(*location, *bought)).unwrap();
                 cur_distance = distance;
+                cur_count = count;
             }
             for path in map.get(&location).unwrap() {
-                let new_distance = cur_distance + path.distance;
                 let bought = *bought || stores.contains(&path.to);
-
+                
                 if locked.contains(&(path.to, bought)) {
                     continue;
                 }
                 counter += 1;
-
+                let new_distance = cur_distance + path.distance;
+                
                 // Find the minimum distance for that round
                 if bought {
                     match min_with_cookie_distance {
@@ -113,12 +115,13 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
                     if let Some((distance, count)) = state_distances.get_mut(&(path.to, bought)) {
                         if *distance > new_distance {
                             *distance = new_distance;
-                            *count = 1;
+                            *count = cur_count;
                         } else if *distance == new_distance {
-                            *count += 1;
+                            *count += cur_count;
+                            *count %= 1000000;
                         }
                     } else {
-                        state_distances.insert((path.to, bought), (new_distance, 1));
+                        state_distances.insert((path.to, bought), (new_distance, cur_count));
                     }
                 }
             }
@@ -145,8 +148,6 @@ fn load_min_distances(map: &HashMap<usize, Vec<Path>>, stores: &HashSet<usize>, 
             locked.insert((location, true));
             new_nodes.insert((location, true));
         }
-
-        println!("cur_locations: {:?}", cur_locations);
     }
 
     state_distances
@@ -162,8 +163,6 @@ fn main() {
     load_stores(&mut stores);
 
     let min_distances_from_start = load_min_distances(&map, &stores, 1);
-
-    println!("min_distances_from_start: {:?}", min_distances_from_start);
 
     min_distances_from_start.get(&(n, true)).map(|(distance, count)| {
         println!("{} {}", distance, count);
