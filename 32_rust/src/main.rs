@@ -37,9 +37,80 @@ fn parse_levels(n: usize) -> Vec<Skill> {
     skills
 }
 
+fn max(skills: &Vec<Skill>, t: usize, removed: Vec<usize>) -> usize {
+    let mut result = 0;
+
+    for (i, skill) in skills.iter().enumerate() {
+        if removed.contains(&i) {
+            continue;
+        }
+
+        let mut time = 0;
+        let mut exp = 0;
+
+        for level in skill {
+            time += level.time;  
+            if time > t {
+                break;
+            }
+
+            exp += level.experience;
+
+            let mut new_removed = removed.clone();
+            new_removed.push(i);
+
+            let current_max = max(skills, t - time, new_removed) + exp;
+            if current_max > result {
+                result = current_max;
+            }
+        }
+    }
+    result
+}
+
 fn main() {
     let (n, t) = parse_n_and_t();
     let skills = parse_levels(n);
 
-    println!("{:?}", skills);
+    let removed = Vec::new();
+    println!("{}", max(&skills, t, removed));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_max() {
+        let skills = vec![
+            vec![
+                Level { time: 10, experience: 1 },
+                Level { time: 10, experience: 19 },
+            ],
+            vec![
+                Level { time: 10, experience: 10 },
+            ],
+            vec![
+                Level { time: 20, experience: 15 },
+            ]
+        ];
+        assert_eq!(max(&skills, 20, vec![]), 20);
+    }
+
+    #[test]
+    fn test_max_with_more_time_than_needed() {
+        let skills = vec![
+            vec![
+                Level { time: 10, experience: 1 },
+                Level { time: 10, experience: 19 },
+            ],
+            vec![
+                Level { time: 15, experience: 12 },
+            ],
+            vec![
+                Level { time: 15, experience: 10 },
+            ]
+        ];
+        assert_eq!(max(&skills, 32, vec![]), 22);
+    }
 }
