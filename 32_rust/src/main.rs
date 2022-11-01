@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, collections::HashMap};
 
 fn parse_n_and_t() -> (usize, usize) {
     let mut input = String::new();
@@ -37,7 +37,11 @@ fn parse_levels(n: usize) -> Vec<Skill> {
     skills
 }
 
-fn max(skills: &Vec<Skill>, t: usize, removed: Vec<usize>) -> usize {
+fn max(skills: &Vec<Skill>, t: usize, removed: Vec<usize>, memo: &mut HashMap<(usize, Vec<usize>), usize>) -> usize {
+    if let Some(&result) = memo.get(&(t, removed.clone())) {
+        return result;
+    }
+
     let mut result = 0;
 
     for (i, skill) in skills.iter().enumerate() {
@@ -58,13 +62,17 @@ fn max(skills: &Vec<Skill>, t: usize, removed: Vec<usize>) -> usize {
 
             let mut new_removed = removed.clone();
             new_removed.push(i);
+            new_removed.sort();
 
-            let current_max = max(skills, t - time, new_removed) + exp;
+            let current_max = max(skills, t - time, new_removed, memo) + exp;
             if current_max > result {
                 result = current_max;
             }
         }
     }
+
+    memo.insert((t, removed), result);
+
     result
 }
 
@@ -73,7 +81,8 @@ fn main() {
     let skills = parse_levels(n);
 
     let removed = Vec::new();
-    println!("{}", max(&skills, t, removed));
+    let mut memo = HashMap::new();
+    println!("{}", max(&skills, t, removed, &mut memo));
 }
 
 #[cfg(test)]
@@ -94,7 +103,7 @@ mod tests {
                 Level { time: 20, experience: 15 },
             ]
         ];
-        assert_eq!(max(&skills, 20, vec![]), 20);
+        assert_eq!(max(&skills, 20, vec![], &mut HashMap::new()), 20);
     }
 
     #[test]
@@ -111,6 +120,6 @@ mod tests {
                 Level { time: 15, experience: 10 },
             ]
         ];
-        assert_eq!(max(&skills, 32, vec![]), 22);
+        assert_eq!(max(&skills, 32, vec![], &mut HashMap::new()), 22);
     }
 }
