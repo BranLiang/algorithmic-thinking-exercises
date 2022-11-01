@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, collections::HashMap};
 
 fn parse_n_and_t() -> (usize, usize) {
     let mut input = String::new();
@@ -37,7 +37,11 @@ fn parse_levels(n: usize) -> Vec<Skill> {
     skills
 }
 
-fn max(skills: &Vec<Skill>, t: usize, skip: usize) -> usize {
+fn max(skills: &Vec<Skill>, t: usize, skip: usize, memo: &mut HashMap<(usize, usize), usize>) -> usize {
+    if let Some(&result) = memo.get(&(t, skip)) {
+        return result;
+    }
+
     let mut result = 0;
 
     if skip == skills.len() {
@@ -45,7 +49,7 @@ fn max(skills: &Vec<Skill>, t: usize, skip: usize) -> usize {
     }
 
     // Max experience if no level is learned for current skill
-    let current_max = max(skills, t, skip+1);
+    let current_max = max(skills, t, skip+1, memo);
     if current_max > result {
         result = current_max;
     }
@@ -63,11 +67,13 @@ fn max(skills: &Vec<Skill>, t: usize, skip: usize) -> usize {
 
         exp += level.experience;
 
-        let current_max = max(skills, t - time, skip+1) + exp;
+        let current_max = max(skills, t - time, skip+1, memo) + exp;
         if current_max > result {
             result = current_max;
         }
     }
+
+    memo.insert((t, skip), result);
 
     result
 }
@@ -76,7 +82,8 @@ fn main() {
     let (n, t) = parse_n_and_t();
     let skills = parse_levels(n);
 
-    println!("{}", max(&skills, t, 0));
+    let mut memo = HashMap::new();
+    println!("{}", max(&skills, t, 0, &mut memo));
 }
 
 #[cfg(test)]
@@ -97,7 +104,7 @@ mod tests {
                 Level { time: 20, experience: 15 },
             ]
         ];
-        assert_eq!(max(&skills, 20, 0), 20);
+        assert_eq!(max(&skills, 20, 0, &mut HashMap::new()), 20);
     }
 
     #[test]
@@ -114,6 +121,6 @@ mod tests {
                 Level { time: 15, experience: 10 },
             ]
         ];
-        assert_eq!(max(&skills, 32, 0), 22);
+        assert_eq!(max(&skills, 32, 0, &mut HashMap::new()), 22);
     }
 }
