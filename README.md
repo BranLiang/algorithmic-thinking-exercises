@@ -50,3 +50,6 @@
 - [28 Divide and Mod](https://dmoj.ca/problem/divmod)
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
 - [30 Pop Explosion](https://dmoj.ca/problem/p154ex6)
+
+## String Algorithm
+- [33 Mimi and Dictionary](https://dmoj.ca/problem/dmopc17c2p4)
