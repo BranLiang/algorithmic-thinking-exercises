@@ -21,6 +21,7 @@ fn parse_line(max_heap: &mut BinaryHeap<usize>, min_heap: &mut BinaryHeap<Revers
 }
 
 fn main() {
+    // This is incorrect here, and min-max binary heap should be used instead
     let mut max_heap = BinaryHeap::new();
     let mut min_heap = BinaryHeap::new();
 
