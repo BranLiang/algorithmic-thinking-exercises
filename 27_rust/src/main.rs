@@ -117,6 +117,9 @@ fn find_longest(from: usize, edges: &Map, parents: &HashMap<usize, usize>, paths
 
 fn find_second_longest(n: usize, edges: &mut Map, parents: &HashMap<usize, usize>) -> usize {
     let mut longest = 0;
+    let mut longest_from = 0;
+    let mut second_largest = 0;
+
     let mut tmp_paths = Vec::new();
     let mut paths = Vec::new();
     for from in 1..n {
@@ -125,22 +128,23 @@ fn find_second_longest(n: usize, edges: &mut Map, parents: &HashMap<usize, usize
             paths.clear();
             paths.push(tmp_paths.pop().unwrap());
             paths.push(tmp_paths.pop().unwrap());
+            second_largest = longest;
             longest = distance;
+            longest_from = from;
+        } else if distance > second_largest {
+            second_largest = distance;
         }
     }
 
-    let mut second_longest = 0;
     for (from, to) in paths {
         let length = remove_edge(from, to, edges);
-        for from in 1..n {
-            let distance = find_longest(from, edges, parents, &mut tmp_paths, false);
-            if distance > second_longest {
-                second_longest = distance;
-            }
+        let distance = find_longest(longest_from, edges, parents, &mut tmp_paths, false);
+        if distance > second_largest {
+            second_largest = distance;
         }
         add_edge(from, to, length, edges);
     }
-    second_longest
+    second_largest
 }
 
 fn main() -> io::Result<()> {
