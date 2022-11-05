@@ -1,5 +1,4 @@
 use std::io;
-use std::collections::HashSet;
 
 fn is_palindrome(s: &str) -> bool {
     let mut chars = s.chars();
@@ -12,16 +11,7 @@ fn is_palindrome(s: &str) -> bool {
 }
 
 fn existed(s: &str, len: usize) -> bool {
-    let mut visited = HashSet::new();
-    visited.insert(&s[0..len]);
-    for j in 1..s.len() - len + 1 {
-        let sub = &s[j..j + len];
-        if visited.contains(sub) {
-            return true;
-        }
-        visited.insert(sub);
-    }
-    false
+    s[1..].contains(&s[..len])
 }
 
 fn main() {
@@ -30,6 +20,7 @@ fn main() {
 
     for i in (1..input.len()).rev() {
         let s = &input[0..i];
+        
         if is_palindrome(s) {
             if existed(&input, s.len()) {
                 println!("{}", s.len());
