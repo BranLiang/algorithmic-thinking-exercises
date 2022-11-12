@@ -17,6 +17,7 @@
 - [08 Hockey rivalry](https://dmoj.ca/problem/cco18p1)
 - [09 Ways to pass](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=1851)
 - [32 Getting Good at Programming](https://dmoj.ca/problem/mec16p3)
+- [35 Foxling Feeding Frenzy](https://dmoj.ca/problem/acmtryouts1e)
 
 ## Graphs and breadth first search
 - [10 Knight chase](https://dmoj.ca/problem/ccc99s4)
@@ -51,6 +52,6 @@
 - [26 Two Kangaroos](https://dmoj.ca/problem/tle16c6j3)
 - [30 Pop Explosion](https://dmoj.ca/problem/p154ex6)
 - [33 Mimi and Dictionary](https://dmoj.ca/problem/dmopc17c2p4)
+- [34 Srednji](https://dmoj.ca/problem/coci07c1p5)
 
 ## Uncategorized
-- [34 Srednji](https://dmoj.ca/problem/coci07c1p5)
