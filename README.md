@@ -25,6 +25,7 @@
 - [12 Book translation](https://dmoj.ca/problem/ecna16d)
 - [25 Pursuit of Knowledge](https://dmoj.ca/problem/gfssoc1j5)
 - [31 Wish Upon a Star](https://dmoj.ca/problem/dmopc18c6p3)
+- [36 Baltic OI '14 P5 - Portals](https://dmoj.ca/problem/btoi14p5)
 
 ## Shortest paths in weighted graph
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
