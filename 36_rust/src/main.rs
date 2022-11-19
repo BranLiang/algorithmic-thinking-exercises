@@ -47,7 +47,7 @@ fn portals(location: Position, map: &Map) -> HashSet<Position> {
     portals
 }
 
-fn next_locations(location: Position, map: &Map, portals: &HashSet<Position>) -> HashSet<Position> {
+fn next_locations(location: Position, map: &Map) -> HashSet<Position> {
     let mut next_locations = HashSet::new();
     let (row, col) = location;
 
@@ -71,15 +71,6 @@ fn next_locations(location: Position, map: &Map, portals: &HashSet<Position>) ->
         next_locations.insert((row, col + 1));
     }
 
-    // Go through portal
-    if portals.contains(&location) {
-        for portal in portals {
-            if *portal != location {
-                next_locations.insert(*portal);
-            }
-        }
-    }
-
     next_locations
 }
 
@@ -87,27 +78,45 @@ fn solve(map: &Map, start: Position) {
     let mut distances: HashMap<Position, usize> = HashMap::new();
     distances.insert(start, 0);
 
-    let mut potential_portals = HashSet::new();
-
-    let mut current = vec![start];
-    let mut next = HashSet::new();
+    let mut current = HashMap::new();
+    current.insert(start, portals(start, map));
     
     while !current.is_empty() {
-        for location in current.iter() {
-            potential_portals.extend(portals(*location, map));
-            for next_location in next_locations(*location, map, &potential_portals) {
+        let mut next = HashMap::new();
+        for (location, available_portals) in current.iter() {
+            if map[location.0][location.1] == 'C' {
+                println!("{}", distances[location]);
+                return;
+            }
+            
+            for next_location in next_locations(*location, map) {
                 if map[next_location.0][next_location.1] == 'C' {
                     println!("{}", distances[location] + 1);
                     return;
                 }
 
+                let mut next_portals = available_portals.clone();
+                next_portals.extend(portals(next_location, map));
+
                 if !distances.contains_key(&next_location) {
                     distances.insert(next_location, distances[location] + 1);
-                    next.insert(next_location);
+                    next.insert(next_location, next_portals);
+                }
+            }
+
+            if available_portals.contains(location) {
+                for portal in available_portals {
+                    if !distances.contains_key(portal) {
+                        let mut next_portals = HashSet::from([*location]);
+                        next_portals.extend(portals(*portal, map));
+
+                        distances.insert(*portal, distances[location] + 1);
+                        next.insert(*portal, next_portals);
+                    }
                 }
             }
         }
-        current = next.drain().collect();
+        current = next;
     }
 }
 
