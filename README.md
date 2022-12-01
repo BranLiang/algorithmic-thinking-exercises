@@ -56,3 +56,5 @@
 - [34 Srednji](https://dmoj.ca/problem/coci07c1p5)
 
 ## Uncategorized
+
+implement z-algorithm using two strings
