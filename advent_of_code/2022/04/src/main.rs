@@ -13,8 +13,12 @@ fn parse_assignments(input: &str) -> ((usize, usize), (usize, usize)) {
     ((x1, y1), (x2, y2))
 }
 
-fn full_include(a: (usize, usize), b: (usize, usize)) -> bool {
-    (a.0 <= b.0 && a.1 >= b.1) || (b.0 <= a.0 && b.1 >= a.1)
+// fn full_include(a: (usize, usize), b: (usize, usize)) -> bool {
+//     (a.0 <= b.0 && a.1 >= b.1) || (b.0 <= a.0 && b.1 >= a.1)
+// }
+
+fn overlap(a: (usize, usize), b: (usize, usize)) -> bool {
+    (a.0 <= b.0 && a.1 >= b.0) || (b.0 <= a.0 && b.1 >= a.0)
 }
 
 fn main() {
@@ -22,7 +26,7 @@ fn main() {
     for line in io::stdin().lines() {
         let line = line.unwrap();
         let (a, b) = parse_assignments(&line);
-        if full_include(a, b) {
+        if overlap(a, b) {
             count += 1;
         }
     }
@@ -43,14 +47,14 @@ mod tests {
         assert_eq!(y2, 5);
     }
 
-    #[test]
-    fn test_full_include() {
-        let a = (1, 3);
-        let b = (2, 4);
-        let c = (1, 5);
-        assert!(!full_include(a, b));
-        assert!(!full_include(b, a));
-        assert!(full_include(a, c));
-        assert!(full_include(c, b));
-    }
+    // #[test]
+    // fn test_full_include() {
+    //     let a = (1, 3);
+    //     let b = (2, 4);
+    //     let c = (1, 5);
+    //     assert!(!full_include(a, b));
+    //     assert!(!full_include(b, a));
+    //     assert!(full_include(a, c));
+    //     assert!(full_include(c, b));
+    // }
 }
