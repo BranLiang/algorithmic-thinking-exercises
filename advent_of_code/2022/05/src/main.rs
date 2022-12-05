@@ -23,8 +23,8 @@ fn operate(supplies: &mut Vec<Vec<char>>, m: &Move) {
         let from = &mut supplies[m.from];
         crates.push(from.pop().unwrap());
     }
-    for item in crates {
-        supplies[m.to].push(item);
+    for item in crates.iter().rev() {
+        supplies[m.to].push(*item);
     }
 }
 
@@ -90,7 +90,7 @@ mod tests {
         operate(&mut supplies, &m);
         assert_eq!(supplies[1], vec!['Z']);
         assert_eq!(supplies[2], vec!['M', 'C']);
-        assert_eq!(supplies[3], vec!['P', 'D', 'N']);
+        assert_eq!(supplies[3], vec!['P', 'N', 'D']);
     }
 
     #[test]
