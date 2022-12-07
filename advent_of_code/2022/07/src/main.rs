@@ -107,5 +107,22 @@ fn main() {
             sum += size;
         }
     }
-    println!("{}", sum);
+    println!("part 1: {}", sum);
+
+    // Part 2
+    let total = 70000000;
+    let root_size = fs.get("/").unwrap().size(&fs);
+    let needed = 30000000 - (total - root_size);
+
+    let mut minimum = 0;
+    for dir in fs.values() {
+        let size = dir.size(&fs);
+        if size >= needed {
+            if minimum == 0 || size < minimum {
+                minimum = size;
+            }
+        }
+    }
+
+    println!("part 2: {}", minimum);
 }
