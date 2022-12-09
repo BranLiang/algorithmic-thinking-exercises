@@ -29,55 +29,79 @@ struct Position {
     y: isize,
 }
 
-struct Rope {
+struct Knot {
     head: Position,
-    tail: Position,
+    next: Option<Box<Knot>>,
 }
 
-impl Rope {
+impl Knot {
+    fn new() -> Knot {
+        let mut head = Knot {
+            head: Position { x: 0, y: 0 },
+            next: None,
+        };
+        for _ in 0..9 {
+            head = Knot {
+                head: Position { x: 0, y: 0 },
+                next: Some(Box::new(head)),
+            };
+        }
+        head
+    }
+
+    fn tail(&self) -> Position {
+        match self.next {
+            Some(ref next) => next.tail(),
+            None => self.head,
+        }
+    }
+
     fn move_up(&mut self) {
         self.head.y += 1;
-        self.move_tail();
+        self.move_next();
     }
 
     fn move_down(&mut self) {
         self.head.y -= 1;
-        self.move_tail()
+        self.move_next()
     }
 
     fn move_left(&mut self) {
         self.head.x -= 1;
-        self.move_tail()
+        self.move_next()
     }
 
     fn move_right(&mut self) {
         self.head.x += 1;
-        self.move_tail()
+        self.move_next()
     }
 
-    fn move_tail(&mut self) {
-        let x_diff = self.head.x - self.tail.x;
-        let y_diff = self.head.y - self.tail.y;
-        if x_diff.abs() == 2 {
-            self.tail.x += x_diff / 2;
-            if y_diff.abs() == 1 {
-                self.tail.y += y_diff;
-            }
-        }
-        if y_diff.abs() == 2 {
-            self.tail.y += y_diff / 2;
-            if x_diff.abs() == 1 {
-                self.tail.x += x_diff;
-            }
+    fn move_next(&mut self) {
+        match self.next {
+            Some(ref mut next) => {
+                let x_diff = self.head.x - next.head.x;
+                let y_diff = self.head.y - next.head.y;
+                if x_diff.abs() == 2 {
+                    next.head.x += x_diff / 2;
+                    if y_diff.abs() == 1 {
+                        next.head.y += y_diff;
+                    }
+                }
+                if y_diff.abs() == 2 {
+                    next.head.y += y_diff / 2;
+                    if x_diff.abs() == 1 {
+                        next.head.x += x_diff;
+                    }
+                }
+                next.move_next();
+            },
+            None => {}
         }
     }
 }
 
 fn main() {
-    let mut rope = Rope {
-        head: Position { x: 0, y: 0 },
-        tail: Position { x: 0, y: 0 },
-    };
+    let mut knot = Knot::new();
     let mut visited = HashSet::new();
     for line in io::stdin().lines() {
         let line = line.unwrap();
@@ -85,26 +109,30 @@ fn main() {
         match m {
             Move::R(dist) => {
                 for _ in 0..dist {
-                    rope.move_right();
-                    visited.insert((rope.tail.x, rope.tail.y));
+                    knot.move_right();
+                    let tail = knot.tail();
+                    visited.insert((tail.x, tail.y));
                 }
             }
             Move::L(dist) => {
                 for _ in 0..dist {
-                    rope.move_left();
-                    visited.insert((rope.tail.x, rope.tail.y));
+                    knot.move_left();
+                    let tail = knot.tail();
+                    visited.insert((tail.x, tail.y));
                 }
             }
             Move::U(dist) => {
                 for _ in 0..dist {
-                    rope.move_up();
-                    visited.insert((rope.tail.x, rope.tail.y));
+                    knot.move_up();
+                    let tail = knot.tail();
+                    visited.insert((tail.x, tail.y));
                 }
             }
             Move::D(dist) => {
                 for _ in 0..dist {
-                    rope.move_down();
-                    visited.insert((rope.tail.x, rope.tail.y));
+                    knot.move_down();
+                    let tail = knot.tail();
+                    visited.insert((tail.x, tail.y));
                 }
             }
         }
@@ -117,37 +145,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_rope_move() {
-        let mut rope = Rope {
-            head: Position { x: 0, y: 0 },
-            tail: Position { x: 0, y: 0 },
-        };
-        rope.move_right();
-        assert_eq!(rope.head, Position { x: 1, y: 0 });
-        assert_eq!(rope.tail, Position { x: 0, y: 0 });
-        rope.move_right();
-        assert_eq!(rope.head, Position { x: 2, y: 0 });
-        assert_eq!(rope.tail, Position { x: 1, y: 0 });
-        rope.move_up();
-        assert_eq!(rope.head, Position { x: 2, y: 1 });
-        assert_eq!(rope.tail, Position { x: 1, y: 0 });
-        rope.move_up();
-        assert_eq!(rope.head, Position { x: 2, y: 2 });
-        assert_eq!(rope.tail, Position { x: 2, y: 1 });
-        rope.move_down();
-        assert_eq!(rope.head, Position { x: 2, y: 1 });
-        assert_eq!(rope.tail, Position { x: 2, y: 1 });
-        rope.move_down();
-        assert_eq!(rope.head, Position { x: 2, y: 0 });
-        assert_eq!(rope.tail, Position { x: 2, y: 1 });
-        rope.move_down();
-        assert_eq!(rope.head, Position { x: 2, y: -1 });
-        assert_eq!(rope.tail, Position { x: 2, y: 0 });
-        rope.move_left();
-        assert_eq!(rope.head, Position { x: 1, y: -1 });
-        assert_eq!(rope.tail, Position { x: 2, y: 0 });
-        rope.move_left();
-        assert_eq!(rope.head, Position { x: 0, y: -1 });
-        assert_eq!(rope.tail, Position { x: 1, y: -1 });
+    fn test_knot_new() {
+        let k = Knot::new();
+        assert_eq!(k.head, Position { x: 0, y: 0 });
+        assert_eq!(k.tail(), Position { x: 0, y: 0 });
     }
 }
