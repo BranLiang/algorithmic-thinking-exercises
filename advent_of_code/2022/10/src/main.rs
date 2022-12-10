@@ -41,9 +41,23 @@ fn main() {
         }
     }
 
+    // Part 1
     let mut signal_strength = 0;
     for cycle in [20, 60, 100, 140, 180, 220].iter() {
         signal_strength += registers[*cycle] * (*cycle as isize);
     }
     println!("{}", signal_strength);
+
+    // part 2
+    for (cycle, register) in registers.iter().enumerate().skip(1) {
+        let pos = (cycle as isize % 40) - 1;
+        if (pos - register).abs() <= 1 {
+            print!("#");
+        } else {
+            print!(".");
+        }
+        if cycle % 40 == 0 {
+            println!("");
+        }
+    }
 }
