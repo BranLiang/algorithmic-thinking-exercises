@@ -12,7 +12,7 @@ fn find_next_locations(cur: &Location, map: &Map) -> Vec<Location> {
     let mut locations = Vec::new();
     // Left
     if cur.col > 0 {
-        if map[cur.row][cur.col - 1] as i32 <= map[cur.row][cur.col] as i32 + 1 {
+        if map[cur.row][cur.col - 1] as i32 + 1 >= map[cur.row][cur.col] as i32 {
             locations.push(
                 Location { row: cur.row, col: cur.col - 1 }
             );
@@ -21,7 +21,7 @@ fn find_next_locations(cur: &Location, map: &Map) -> Vec<Location> {
 
     // Right
     if cur.col < map[cur.row].len() - 1 {
-        if map[cur.row][cur.col + 1] as i32 <= map[cur.row][cur.col] as i32 + 1 {
+        if map[cur.row][cur.col + 1] as i32 + 1 >= map[cur.row][cur.col] as i32 {
             locations.push(
                 Location { row: cur.row, col: cur.col + 1 }
             );
@@ -30,7 +30,7 @@ fn find_next_locations(cur: &Location, map: &Map) -> Vec<Location> {
 
     // Up
     if cur.row > 0 {
-        if map[cur.row - 1][cur.col] as i32 <= map[cur.row][cur.col] as i32 + 1 {
+        if map[cur.row - 1][cur.col] as i32 + 1 >= map[cur.row][cur.col] as i32 {
             locations.push(
                 Location { row: cur.row - 1, col: cur.col }
             );
@@ -39,7 +39,7 @@ fn find_next_locations(cur: &Location, map: &Map) -> Vec<Location> {
 
     // Down
     if cur.row < map.len() - 1 {
-        if map[cur.row + 1][cur.col] as i32 <= map[cur.row][cur.col] as i32 + 1 {
+        if map[cur.row + 1][cur.col] as i32 + 1 >= map[cur.row][cur.col] as i32 {
             locations.push(
                 Location { row: cur.row + 1, col: cur.col }
             );
@@ -79,10 +79,10 @@ fn main() {
     }
 
     let mut distances = HashMap::new();
-    distances.insert(start.clone(), 0);
+    distances.insert(dest.clone(), 0);
 
     let mut currect_locations = Vec::new();
-    currect_locations.push(start);
+    currect_locations.push(dest);
 
     while !currect_locations.is_empty() {
         let mut next_locations = Vec::new();
@@ -97,5 +97,14 @@ fn main() {
         currect_locations = next_locations;
     }
 
-    println!("{}", distances[&dest]);
+    let mut min_steps = 0;
+    for (location, steps) in distances.iter() {
+        if map[location.row][location.col] == 'a' {
+            if min_steps == 0 || min_steps > *steps {
+                min_steps = *steps;
+            }
+        }
+    }
+
+    println!("{}", min_steps);
 }
