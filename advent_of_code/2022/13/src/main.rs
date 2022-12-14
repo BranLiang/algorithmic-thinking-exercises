@@ -1,20 +1,79 @@
 use std::io;
 use std::iter::Peekable;
 use std::str::Chars;
+use std::cmp::Ordering;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Packet {
     List(Vec<Box<Packet>>),
     Number(usize),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Pair {
     left: Packet,
     right: Packet,
 }
 
 impl Packet {
+    fn to_list(&self) -> Self {
+        match self {
+            Packet::List(_) => self.clone(),
+            Packet::Number(_) => {
+                let mut list = Vec::new();
+                list.push(Box::new(self.clone()));
+                Packet::List(list)
+            }
+        }
+    }
+
+    fn compare(&self, other: &Self) -> Ordering {
+        match self {
+            Packet::List(data) => {
+                match other {
+                    Packet::List(other_data) => {
+                        for (i, item) in data.iter().enumerate() {
+                            if i >= other_data.len() {
+                                break;
+                            }
+                            match item.compare(&other_data[i]) {
+                                Ordering::Less => return Ordering::Less,
+                                Ordering::Greater => return Ordering::Greater,
+                                Ordering::Equal => continue
+                            }
+                        }
+                        if data.len() < other_data.len() {
+                            Ordering::Less
+                        } else if data.len() > other_data.len() {
+                            Ordering::Greater
+                        } else {
+                            Ordering::Equal
+                        }
+                    },
+                    Packet::Number(_) => {
+                        self.compare(&other.to_list())
+                    }
+                }
+            },
+            Packet::Number(data) => {
+                match other {
+                    Packet::Number(other_data) => {
+                        if data == other_data {
+                            return Ordering::Equal;
+                        } else if data < other_data {
+                            return Ordering::Less;
+                        } else {
+                            return Ordering::Greater;
+                        }
+                    },
+                    Packet::List(_) => {
+                        self.to_list().compare(other)
+                    },
+                }
+            },
+        }
+    }
+
     pub fn from_str(s: &str) -> Self {
         let mut chars = s.chars().peekable();
         Packet::from_chars(&mut chars)
@@ -75,5 +134,65 @@ fn main() {
         }
     }
 
-    println!("{:#?}", pairs)
+    let mut indexes = Vec::new();
+    for (i, pair) in pairs.iter().enumerate() {
+        let index = i + 1;
+        match pair.left.compare(&pair.right) {
+            Ordering::Less => indexes.push(index),
+            _ => continue,
+
+        }
+    }
+
+    let mut sum = 0;
+    for index in &indexes {
+        sum += index;
+    }
+
+    println!("{:?}", indexes);
+    println!("{}", sum);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_in_order() {
+        let p1 = Packet::from_str("[1,1,3,1,1]");
+        let p2 = Packet::from_str("[1,1,5,1,1]");
+        assert_eq!(p1.compare(&p2), Ordering::Less);
+
+        let p1 = Packet::from_str("[[1],[2,3,4]]");
+        let p2 = Packet::from_str("[[1],4]");
+        assert_eq!(p1.compare(&p2), Ordering::Less);
+
+        let p1 = Packet::from_str("[[4,4],4,4]");
+        let p2 = Packet::from_str("[[4,4],4,4,4]");
+        assert_eq!(p1.compare(&p2), Ordering::Less);
+
+        let p1 = Packet::from_str("[]");
+        let p2 = Packet::from_str("[3]");
+        assert_eq!(p1.compare(&p2), Ordering::Less);
+
+        let p1 = Packet::from_str("[]");
+        let p2 = Packet::from_str("[3]");
+        assert_eq!(p1.compare(&p2), Ordering::Less);
+
+        let p1 = Packet::from_str("[9]");
+        let p2 = Packet::from_str("[[8,7,6]]");
+        assert_eq!(p1.compare(&p2), Ordering::Greater);
+
+        let p1 = Packet::from_str("[7,7,7,7]");
+        let p2 = Packet::from_str("[7,7,7]");
+        assert_eq!(p1.compare(&p2), Ordering::Greater);
+
+        let p1 = Packet::from_str("[[[]]]");
+        let p2 = Packet::from_str("[[]]");
+        assert_eq!(p1.compare(&p2), Ordering::Greater);
+
+        let p1 = Packet::from_str("[1,[2,[3,[4,[5,6,7]]]],8,9]");
+        let p2 = Packet::from_str("[1,[2,[3,[4,[5,6,0]]]],8,9]");
+        assert_eq!(p1.compare(&p2), Ordering::Greater);
+    }
 }
