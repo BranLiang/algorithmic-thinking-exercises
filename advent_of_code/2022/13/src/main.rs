@@ -3,7 +3,7 @@ use std::iter::Peekable;
 use std::str::Chars;
 use std::cmp::Ordering;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Packet {
     List(Vec<Box<Packet>>),
     Number(usize),
@@ -149,8 +149,27 @@ fn main() {
         sum += index;
     }
 
-    println!("{:?}", indexes);
-    println!("{}", sum);
+    println!("Part 1: {}", sum);
+
+    let mut packets = Vec::new();
+    packets.push(Packet::from_str("[[2]]"));
+    packets.push(Packet::from_str("[[6]]"));
+    for pair in &pairs {
+        packets.push(pair.left.clone());
+        packets.push(pair.right.clone());
+    }
+    packets.sort_by(|a, b| a.compare(b));
+    let mut i = 0;
+    let mut j = 0;
+    for (index, packet) in packets.iter().enumerate() {
+        if packet == &Packet::from_str("[[2]]") {
+            i = index + 1;
+        }
+        if packet == &Packet::from_str("[[6]]") {
+            j = index + 1;
+        }
+    }
+    println!("Part 2: {}", j * i);
 }
 
 #[cfg(test)]
