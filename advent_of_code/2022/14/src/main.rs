@@ -8,14 +8,17 @@ type Pos = (usize, usize);
 fn pour_sand(blocks: &HashSet<Pos>, max_y: usize) -> Sand {
     let mut x = 500;
     let mut y = 0;
+
     loop {
-        // limit exceeded
-        if y > max_y {
+        // down one step
+        y += 1;
+
+        // if we are at the bottom, we are done
+        if y == max_y {
+            y -= 1;
             break;
         }
 
-        // down one step
-        y += 1;
         if !blocks.contains(&(x, y)) {
             continue;
         } else {
@@ -105,20 +108,21 @@ fn main() {
             max_y = rock.1;
         }
     }
+    max_y += 2;
 
     let mut blocks: HashSet<Rock> = HashSet::new();
     blocks.extend(&rocks);
     let mut sands: HashSet<Sand> = HashSet::new();
     loop {
         let (x, y) = pour_sand(&blocks, max_y);
-        if y > max_y {
+        if x == 500 && y == 0 {
             break;
         }
         sands.insert((x, y));
-        blocks.extend(&sands);
+        blocks.insert((x, y));
     }
 
-    println!("{}", sands.len());
+    println!("{}", sands.len() + 1);
 }
 
 #[cfg(test)]
