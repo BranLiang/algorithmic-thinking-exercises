@@ -37,21 +37,35 @@ fn parse_beacon(input: &str) -> Pos {
     (x, y)
 }
 
-// fn pos_sacnned(sensor: &Pos, closest_beacon: &Pos, pos: &Pos) -> bool {
-//     let (x1, y1) = sensor;
-//     let (x2, y2) = closest_beacon;
-//     (x1 - x2).abs() + (y1 - y2).abs() >= (x1 - pos.0).abs() + (y1 - pos.1).abs()
-// }
-
-fn pos_scanned_at_row(sensor: &Pos, closest_beacon: &Pos, row: isize) -> HashSet<Pos> {
+fn scanned_range(sensor: &Pos, beacon: &Pos, y: isize) -> Option<(isize, isize)> {
     let (x1, y1) = sensor;
-    let (x2, y2) = closest_beacon;
-    let x_diff = (x1 - x2).abs() + (y1 - y2).abs() - (y1 - row).abs();
-    let mut scanned: HashSet<Pos> = HashSet::new();
-    for x in x1 - x_diff..=x1 + x_diff {
-        scanned.insert((x, row));
+    let (x2, y2) = beacon;
+
+    let x_diff = (x2 - x1).abs() + (y1 - y2).abs() - (y1 - y).abs();
+    if x_diff >= 0 {
+        (x1 - x_diff, x1 + x_diff).into()
+    } else {
+        None
     }
-    scanned
+}
+
+fn merge_ranges(ranges: &[(isize, isize)]) -> Vec<(isize, isize)> {
+    let mut merged = Vec::new();
+    let mut ranges = ranges.to_vec();
+    ranges.sort_by_key(|(x1, _)| *x1);
+
+    let mut current = ranges.remove(0);
+    for (x1, x2) in ranges {
+        if x1 <= current.1 + 1 {
+            current.1 = current.1.max(x2);
+        } else {
+            merged.push(current);
+            current = (x1, x2);
+        }
+    }
+    merged.push(current);
+
+    merged
 }
 
 fn main() {
@@ -69,15 +83,21 @@ fn main() {
         sensors.insert(sensor, beacon);
     }
 
-    let mut scanned: HashSet<Pos> = HashSet::new();
-    for (sensor, beacon) in sensors.iter() {
-        for pos in pos_scanned_at_row(sensor, beacon, 2000000) {
-            if !beacons.contains(&pos) && !sensors.contains_key(&pos) {
-                scanned.insert(pos);
+    for y in 0..=4000000 {
+        let mut ranges = Vec::new();
+        for (sensor, beacon) in sensors.iter() {
+            if let Some(range) = scanned_range(sensor, beacon, y) {
+                ranges.push(range);
             }
         }
+
+        let ranges = merge_ranges(&ranges);
+        if ranges.len() >= 2 {
+            println!("{}", (ranges[0].1 + 1) * 4000000 + y);
+            break;
+        }
     }
-    println!("{}", scanned.len());
+
 }
 
 #[cfg(test)]
@@ -96,5 +116,17 @@ mod test {
         let pos = parse_beacon(" closest beacon is at x=-2, y=15");
         assert_eq!(pos.0, -2);
         assert_eq!(pos.1, 15);
+    }
+
+    #[test]
+    fn test_merge_ranges() {
+        let ranges = merge_ranges(&[(-2, 2), (1, 4), (5, 6)]);
+        assert_eq!(ranges, vec![(-2, 6)]);
+
+        let ranges = merge_ranges(&[(-2, 2), (1, 4), (-1, 6)]);
+        assert_eq!(ranges, vec![(-2, 6)]);
+
+        let ranges = merge_ranges(&[(-2, 2), (3, 4), (6, 7)]);
+        assert_eq!(ranges, vec![(-2, 4), (6, 7)]);
     }
 }
