@@ -1,7 +1,7 @@
 use std::io::{self, BufRead};
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashSet};
 use std::hash::{Hash, Hasher};
-use std::{thread, time};
+// use std::{thread, time};
 
 struct Grid(Vec<Vec<char>>);
 
@@ -105,6 +105,18 @@ impl State {
 
     fn with_portal2(&mut self, portal2: Position) {
         self.portal2 = Some(portal2);
+    }
+
+    fn to_positions(&self) -> HashSet<Position> {
+        let mut positions = HashSet::new();
+        positions.insert(self.pos.clone());
+        if let Some(portal1) = &self.portal1 {
+            positions.insert(portal1.clone());
+        }
+        if let Some(portal2) = &self.portal2 {
+            positions.insert(portal2.clone());
+        }
+        positions
     }
 
     fn neighbors(&self, grid: &Grid) -> Vec<State> {
@@ -213,38 +225,34 @@ impl State {
 
 fn solve(grid: &Grid, start: &Position, cake: &Position) {
     let mut visited = HashSet::new();
-    let mut dist = HashMap::new();
     let mut queue = BinaryHeap::new();
 
     let start_state = State::new(start.clone());
-    visited.insert(start_state.clone());
-    dist.insert(start_state.clone(), 0);
+    visited.insert(start.clone());
     queue.push(start_state);
 
     while let Some(state) = queue.pop() {
         // Debug
-        thread::sleep(time::Duration::from_millis(100));
+        // thread::sleep(time::Duration::from_millis(10));
 
-        println!("State: {:?}", state);
-        for state in dist.iter() {
-            println!("dist: {:?}", state);
-        }
-        println!("");
+        // println!("State: {:?}", state);
+        // for state in visited.iter() {
+        //     println!("visited: {:?}", state);
+        // }
+        // println!("");
 
         if &state.pos == cake {
             println!("{}", state.dist);
             return;
         }
 
-        // Update the minimum distance
-        dist.insert(state.clone(), state.dist);
-
         // Move before firing portals
         for neighbor in state.neighbors(grid) {
-            if !visited.contains(&neighbor) {
-                visited.insert(neighbor.clone());
-                queue.push(neighbor);
+            if neighbor.to_positions().is_subset(&visited) {
+                continue;
             }
+            visited.insert(neighbor.pos.clone());
+            queue.push(neighbor);
         }
     }
 }
