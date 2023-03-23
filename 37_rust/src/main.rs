@@ -16,7 +16,7 @@ fn bfs(grid: &[Vec<char>], k: usize, n: usize, start: Pos, end: Pos, max_jump: i
 
         for i in 0..k {
             for j in 0..n {
-                let dist = ((i as i32 - curr.0 as i32).abs() + (j as i32 - curr.1 as i32).abs()) as i32;
+                let dist = (((i as i32 - curr.0 as i32).pow(2) + (j as i32 - curr.1 as i32).pow(2)) as f32).sqrt().ceil() as i32;
                 if !visited[i][j] && grid[i][j] == '*' && dist <= max_jump {
                     visited[i][j] = true;
                     queue.push_back(((i, j), jumps + 1));
@@ -40,16 +40,15 @@ fn main() {
         .collect();
 
     loop {
-        let start: Vec<usize> = lines
-            .next()
-            .unwrap()
+        let start_line = lines.next().unwrap();
+        if start_line == "-1 -1" {
+            break;
+        }
+        let start: Vec<usize> = start_line
             .split_whitespace()
             .map(|x| x.parse().unwrap())
             .collect();
         let start_pos = (start[0] - 1, start[1] - 1);
-        if start_pos == (usize::MAX, usize::MAX) {
-            break;
-        }
 
         let end: Vec<usize> = lines
             .next()
