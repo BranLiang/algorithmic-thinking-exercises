@@ -1,5 +1,5 @@
 use std::io::{self, BufRead};
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{VecDeque, HashSet};
 use std::hash::{Hash, Hasher};
 // use std::{thread, time};
 
@@ -225,13 +225,13 @@ impl State {
 
 fn solve(grid: &Grid, start: &Position, cake: &Position) {
     let mut visited = HashSet::new();
-    let mut queue = BinaryHeap::new();
+    let mut queue = VecDeque::new();
 
     let start_state = State::new(start.clone());
     visited.insert(start.clone());
-    queue.push(start_state);
+    queue.push_back(start_state);
 
-    while let Some(state) = queue.pop() {
+    while let Some(state) = queue.pop_front() {
         // Debug
         // thread::sleep(time::Duration::from_millis(10));
 
@@ -252,7 +252,7 @@ fn solve(grid: &Grid, start: &Position, cake: &Position) {
                 continue;
             }
             visited.insert(neighbor.pos.clone());
-            queue.push(neighbor);
+            queue.push_back(neighbor);
         }
     }
 }
@@ -338,25 +338,25 @@ mod tests {
 
     #[test]
     fn test_state_ord() {
-        let mut heap = BinaryHeap::new();
+        let mut heap = VecDeque::new();
         let mut state = State::new(Position::new(1, 1));
-        state.dist = 1;
-
-        heap.push(state.clone());
-
-        state.dist = 2;
-        heap.push(state.clone());
 
         state.dist = 0;
-        heap.push(state.clone());
+        heap.push_back(state.clone());
 
         state.dist = 1;
-        heap.push(state.clone());
+        heap.push_back(state.clone());
 
-        assert_eq!(heap.pop().unwrap().dist, 0);
-        assert_eq!(heap.pop().unwrap().dist, 1);
-        assert_eq!(heap.pop().unwrap().dist, 1);
-        assert_eq!(heap.pop().unwrap().dist, 2);
+        state.dist = 1;
+        heap.push_back(state.clone());
+
+        state.dist = 2;
+        heap.push_back(state.clone());
+
+        assert_eq!(heap.pop_front().unwrap().dist, 0);
+        assert_eq!(heap.pop_front().unwrap().dist, 1);
+        assert_eq!(heap.pop_front().unwrap().dist, 1);
+        assert_eq!(heap.pop_front().unwrap().dist, 2);
     }
 
     #[test]
