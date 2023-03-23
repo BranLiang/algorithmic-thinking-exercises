@@ -58,3 +58,5 @@
 ## Uncategorized
 
 implement z-algorithm using two strings
+
+- [37 WC '98 P3 - Do or Do Not](https://dmoj.ca/problem/wc98p3)
