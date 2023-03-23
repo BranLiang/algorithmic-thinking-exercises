@@ -1,177 +1,384 @@
-use std::io;
-use std::collections::{HashSet, HashMap};
+use std::io::{self, BufRead};
+use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::hash::{Hash, Hasher};
+use std::{thread, time};
 
-fn parse_rows_cols() -> (usize, usize) {
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
-    let mut iter = input.split_whitespace();
-    let rows = iter.next().unwrap().parse().unwrap();
-    let cols = iter.next().unwrap().parse().unwrap();
-    (rows, cols)
+struct Grid(Vec<Vec<char>>);
+
+impl Grid {
+    fn is_open_block(&self, pos: &Position) -> bool {
+        self.0[pos.r][pos.c] != '#'
+    }
 }
 
-type Map = Vec<Vec<char>>;
-type Position = (usize, usize);
-
-fn portals(location: Position, map: &Map) -> HashSet<Position> {
-    let mut portals = HashSet::new();
-    let (row, col) = location;
-
-    // Look up
-    let mut row_1 = row - 1;
-    while map[row_1][col] != '#' {
-        row_1 -= 1;
-    }
-    portals.insert((row_1 + 1, col));
-
-    // Look down
-    let mut row_2 = row + 1;
-    while map[row_2][col] != '#' {
-        row_2 += 1;
-    }
-    portals.insert((row_2 - 1, col));
-
-    // Look left
-    let mut col_1 = col - 1;
-    while map[row][col_1] != '#' {
-        col_1 -= 1;
-    }
-    portals.insert((row, col_1 + 1));
-
-    // Look right
-    let mut col_2 = col + 1;
-    while map[row][col_2] != '#' {
-        col_2 += 1;
-    }
-    portals.insert((row, col_2 - 1));
-    portals
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+struct Position {
+    r: usize,
+    c: usize,
 }
 
-fn next_locations(location: Position, map: &Map) -> HashSet<Position> {
-    let mut next_locations = HashSet::new();
-    let (row, col) = location;
-
-    // Go up
-    if map[row - 1][col] == '.' {
-        next_locations.insert((row - 1, col));
+impl Position {
+    fn new(r: usize, c: usize) -> Position {
+        Position { r, c }
     }
 
-    // Go down
-    if map[row + 1][col] == '.' {
-        next_locations.insert((row + 1, col));
-    }
+    fn neighbors(&self, grid: &Grid) -> Vec<Position> {
+        let mut neighbors = Vec::new();
 
-    // Go left
-    if map[row][col - 1] == '.' {
-        next_locations.insert((row, col - 1));
-    }
+        // move up
+        let pos = Position::new(self.r - 1, self.c);
+        if grid.is_open_block(&pos) {
+            neighbors.push(pos);
+        }
 
-    // Go right
-    if map[row][col + 1] == '.' {
-        next_locations.insert((row, col + 1));
-    }
+        // move down
+        let pos = Position::new(self.r + 1, self.c);
+        if grid.is_open_block(&pos) {
+            neighbors.push(pos);
+        }
 
-    next_locations
+        // move left
+        let pos = Position::new(self.r, self.c - 1);
+        if grid.is_open_block(&pos) {
+            neighbors.push(pos);
+        }
+
+        // move right
+        let pos = Position::new(self.r, self.c + 1);
+        if grid.is_open_block(&pos) {
+            neighbors.push(pos);
+        }
+
+        neighbors
+    }
 }
 
-fn min_distance_to_wall(location: Position, map: &Map) -> usize {
-    let (row, col) = location;
-    let mut min_distance = 0;
-    let mut found = false;
-    while !found {
-        min_distance += 1;
-        for i in 0..=min_distance {
-            let row_diff = min_distance - i;
-            let col_diff = i;
-            if map[row - row_diff][col - col_diff] == '#' {
-                found = true;
-                break;
-            }
-            if map[row - row_diff][col + col_diff] == '#' {
-                found = true;
-                break;
-            }
-            if map[row + row_diff][col - col_diff] == '#' {
-                found = true;
-                break;
-            }
-            if map[row + row_diff][col + col_diff] == '#' {
-                found = true;
-                break;
-            }
+#[derive(Debug, Clone)]
+struct State {
+    pos: Position,
+    portal1: Option<Position>,
+    portal2: Option<Position>,
+    dist: usize,
+}
+
+impl Hash for State {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.pos.hash(state);
+        self.portal1.hash(state);
+        self.portal2.hash(state);
+    }
+}
+
+impl PartialEq for State {
+    fn eq(&self, other: &Self) -> bool {
+        self.dist == other.dist
+    }
+}
+
+impl Eq for State {}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other.dist.cmp(&self.dist)
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl State {
+    fn new(pos: Position) -> State {
+        State {
+            pos,
+            portal1: None,
+            portal2: None,
+            dist: 0,
         }
     }
-    min_distance - 1
-}
 
-fn solve(map: &Map, start: Position) {
-    let mut distances: HashMap<Position, usize> = HashMap::new();
-    distances.insert(start, 0);
+    fn with_portal1(&mut self, portal1: Position) {
+        self.portal1 = Some(portal1);
+    }
 
-    let mut current = HashMap::new();
-    current.insert(start, portals(start, map));
-    
-    while !current.is_empty() {
-        let mut next = HashMap::new();
-        for (location, available_portals) in current.iter() {
-            if map[location.0][location.1] == 'C' {
-                println!("{}", distances[location]);
-                return;
-            }
-            for next_location in next_locations(*location, map) {
-                if !distances.contains_key(&next_location) || distances[&next_location] > distances[location] + 1 {
-                    let mut next_portals = available_portals.clone();
-                    next_portals.extend(portals(next_location, map));
+    fn with_portal2(&mut self, portal2: Position) {
+        self.portal2 = Some(portal2);
+    }
 
-                    distances.insert(next_location, distances[location] + 1);
-                    next.insert(next_location, next_portals);
-                }
-            }
+    fn neighbors(&self, grid: &Grid) -> Vec<State> {
+        let mut neighbors = self.pos.neighbors(grid);
 
-            let min_distance_to_wall = min_distance_to_wall(*location, map);
-            for portal in available_portals {
-                if !distances.contains_key(portal) || distances[portal] > distances[location] + min_distance_to_wall + 1 {
-                    let mut next_portals = HashSet::from([*location]);
-                    next_portals.extend(portals(*portal, map));
-
-                    distances.insert(*portal, distances[location] + min_distance_to_wall + 1);
-                    next.insert(*portal, next_portals);
+        // Teleport from portal1 to portal2
+        if let Some(portal1) = &self.portal1 {
+            if portal1 == &self.pos {
+                if let Some(portal2) = &self.portal2 {
+                    if !neighbors.contains(&portal2) && portal2 != &self.pos {
+                        neighbors.push(portal2.clone());
+                    }
                 }
             }
         }
-        current = next;
+
+        // Teleport from portal2 to portal1
+        if let Some(portal2) = &self.portal2 {
+            if portal2 == &self.pos {
+                if let Some(portal1) = &self.portal1 {
+                    if !neighbors.contains(&portal1) && portal1 != &self.pos {
+                        neighbors.push(portal1.clone());
+                    }
+                }
+            }
+        }
+
+        let mut result = Vec::new();
+
+        for neighbor in neighbors {
+            let mut state = State::new(neighbor);
+            state.dist = self.dist + 1;
+            result.extend(state.possible_portal_states(grid));
+        }
+
+        result
+    }
+
+    fn possible_portal_states(&self, grid: &Grid) -> Vec<State> {
+        let mut states = Vec::new();
+        let portals = self.possible_portals(&grid);
+
+        // Double portals persisted
+        for portal1 in &portals {
+            for portal2 in &portals {
+                if portal1 < portal2 {
+                    let mut state = self.clone();
+                    // Set portal1
+                    state.with_portal1(portal1.clone());
+                    // Set portal2
+                    state.with_portal2(portal2.clone());
+                    states.push(state);
+                }
+            }
+        }
+
+        states
+    }
+
+    fn possible_portals(&self, grid: &Grid) -> HashSet<Position> {
+        let mut portals = HashSet::new();
+
+        // Move up
+        let mut pos = self.pos.clone();
+        while grid.is_open_block(&pos) {
+            pos.r -= 1;
+        }
+        pos.r += 1;
+        portals.insert(pos.clone());
+
+        // Move down
+        let mut pos = self.pos.clone();
+        while grid.is_open_block(&pos) {
+            pos.r += 1;
+        }
+        pos.r -= 1;
+        portals.insert(pos.clone());
+
+        // Move left
+        let mut pos = self.pos.clone();
+        while grid.is_open_block(&pos) {
+            pos.c -= 1;
+        }
+        pos.c += 1;
+        portals.insert(pos.clone());
+
+        // Move right
+        let mut pos = self.pos.clone();
+        while grid.is_open_block(&pos) {
+            pos.c += 1;
+        }
+        pos.c -= 1;
+        portals.insert(pos.clone());
+
+        if let Some(portal1) = &self.portal1 {
+            portals.insert(portal1.clone());
+        }
+
+        if let Some(portal2) = &self.portal2 {
+            portals.insert(portal2.clone());
+        }
+
+        portals
+    }
+}
+
+fn solve(grid: &Grid, start: &Position, cake: &Position) {
+    let mut visited = HashSet::new();
+    let mut dist = HashMap::new();
+    let mut queue = BinaryHeap::new();
+
+    let start_state = State::new(start.clone());
+    visited.insert(start_state.clone());
+    dist.insert(start_state.clone(), 0);
+    queue.push(start_state);
+
+    while let Some(state) = queue.pop() {
+        // Debug
+        thread::sleep(time::Duration::from_millis(100));
+
+        println!("State: {:?}", state);
+        for state in dist.iter() {
+            println!("dist: {:?}", state);
+        }
+        println!("");
+
+        if &state.pos == cake {
+            println!("{}", state.dist);
+            return;
+        }
+
+        // Update the minimum distance
+        dist.insert(state.clone(), state.dist);
+
+        // Move before firing portals
+        for neighbor in state.neighbors(grid) {
+            if !visited.contains(&neighbor) {
+                visited.insert(neighbor.clone());
+                queue.push(neighbor);
+            }
+        }
     }
 }
 
 fn main() {
-    // Parse the number of rows and columns
-    let (rows, cols) = parse_rows_cols();
+    let stdin = io::stdin();
+    let mut lines = stdin.lock().lines().map(|l| l.unwrap());
 
-    // Initialize the map with all walls, the labyrinth is surrounded by walls
-    let mut map = vec![vec!['#'; cols + 2]; rows + 2];
+    let rc: Vec<usize> = lines
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .map(|s| s.parse().unwrap())
+        .collect();
 
+    // false: open, true: wall
+    let mut maze: Grid = Grid(vec![vec!['#'; rc[1] + 2]; rc[0] + 2]);
     let mut start = (0, 0);
+    let mut cake = (0, 0);
 
-    // Parse the labyrinth
-    for row in 1..rows + 1 {
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-        for (col, c) in input.trim().chars().enumerate() {
-            map[row][col + 1] = c;
-            // Find the start location
-            if c == 'S' {
-                start = (row, col + 1);
+    for i in 0..rc[0] {
+        let line = lines.next().unwrap();
+        for (j, c) in line.chars().enumerate() {
+            let i = i + 1;
+            let j = j + 1;
+            maze.0[i][j] = c;
+            match c {
+                'S' => {
+                    start = (i, j);
+                },
+                'C' => {
+                    cake = (i, j);
+                },
+                _ => {},
             }
         }
     }
+    solve(&maze, &Position::new(start.0, start.1), &Position::new(cake.0, cake.1));
+}
 
-    // Print the map
-    // for row in 0..rows + 2 {
-    //     for col in 0..cols + 2 {
-    //         print!("{}", map[row][col]);
-    //     }
-    //     println!("");
-    // }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    solve(&map, start);
+    #[test]
+    fn test_is_open_block() {
+        let grid = grid();
+        assert_eq!(grid.is_open_block(&Position::new(1, 1)), true);
+        assert_eq!(grid.is_open_block(&Position::new(1, 2)), false);
+    }
+
+    #[test]
+    fn test_position_neighbors() {
+        let grid = grid();
+        let pos = Position::new(1, 1);
+        let neighbors = pos.neighbors(&grid);
+        assert_eq!(neighbors.len(), 1);
+        assert_eq!(neighbors.contains(&Position::new(2, 1)), true);
+
+        let pos = Position::new(3, 2);
+        let neighbors = pos.neighbors(&grid);
+        assert_eq!(neighbors.len(), 3);
+        assert_eq!(neighbors.contains(&Position::new(4, 2)), true);
+        assert_eq!(neighbors.contains(&Position::new(3, 1)), true);
+        assert_eq!(neighbors.contains(&Position::new(3, 3)), true);
+    }
+
+    #[test]
+    fn test_state_hash() {
+        let mut set = HashSet::new();
+        set.insert(State::new(Position::new(1, 1)));
+        set.insert(State::new(Position::new(1, 1)));
+        assert_eq!(set.len(), 1);
+
+        let mut state = State::new(Position::new(1, 1));
+        state.with_portal1(Position::new(1, 2));
+        set.insert(state);
+        assert_eq!(set.len(), 2);
+
+        set.insert(State::new(Position::new(1, 2)));
+        assert_eq!(set.len(), 3);
+    }
+
+    #[test]
+    fn test_state_ord() {
+        let mut heap = BinaryHeap::new();
+        let mut state = State::new(Position::new(1, 1));
+        state.dist = 1;
+
+        heap.push(state.clone());
+
+        state.dist = 2;
+        heap.push(state.clone());
+
+        state.dist = 0;
+        heap.push(state.clone());
+
+        state.dist = 1;
+        heap.push(state.clone());
+
+        assert_eq!(heap.pop().unwrap().dist, 0);
+        assert_eq!(heap.pop().unwrap().dist, 1);
+        assert_eq!(heap.pop().unwrap().dist, 1);
+        assert_eq!(heap.pop().unwrap().dist, 2);
+    }
+
+    #[test]
+    fn test_possible_portals() {
+        let grid = grid();
+        let state = State::new(Position::new(1, 1));
+        let portals = state.possible_portals(&grid);
+        assert_eq!(portals.len(), 2);
+        assert_eq!(portals.contains(&Position::new(1, 1)), true);
+        assert_eq!(portals.contains(&Position::new(4, 1)), true);
+    }
+
+    #[test]
+    fn test_state_possible_portal_states() {
+        let grid = grid();
+        let mut state = State::new(Position::new(3, 3));
+        state.with_portal1(Position::new(1, 1));
+        state.with_portal2(Position::new(4, 4));
+        let states = state.possible_portal_states(&grid);
+        assert_eq!(states.len(), 15);
+    }
+
+    fn grid() -> Grid {
+        Grid(vec![
+            vec!['#', '#', '#', '#', '#', '#'],
+            vec!['#', '.', '#', '.', 'C', '#'],
+            vec!['#', '.', '#', '.', '#', '#'],
+            vec!['#', '.', '.', '.', '.', '#'],
+            vec!['#', 'S', '.', '.', '.', '#'],
+            vec!['#', '#', '#', '#', '#', '#'],
+        ])
+    }
 }
