@@ -1,6 +1,6 @@
 use std::io;
 use std::str::FromStr;
-use std::collections::HashMap;
+use std::collections::{HashSet, HashMap};
 
 // Function to read input data
 fn read_input<T: FromStr>() -> Vec<T> {
@@ -23,22 +23,28 @@ fn dfs(
     node: usize,
     parent: usize,
     tree: &HashMap<usize, Vec<(usize, u32)>>,
-    chambers_with_items: &[usize],
-) -> u32 {
+    chambers_with_items: &HashSet<usize>,
+) -> (u32, bool) {
     let mut total_magic_points = 0;
+    let mut items_found = false;
 
     if chambers_with_items.contains(&node) {
-        total_magic_points += tree.get(&parent).unwrap().iter().find(|&&(n, _)| n == node).unwrap().1;
+        items_found = true;
     }
 
-    for &(child, _) in tree.get(&node).unwrap() {
+    for &(child, m) in tree.get(&node).unwrap() {
         if child == parent {
             continue;
         }
-        total_magic_points += dfs(child, node, tree, chambers_with_items);
+        let (magic_points, found) = dfs(child, node, tree, chambers_with_items);
+        if found {
+            items_found = true;
+            total_magic_points += m;
+            total_magic_points += magic_points;
+        }
     }
 
-    total_magic_points
+    (total_magic_points, items_found)
 }
 
 fn main() {
@@ -58,7 +64,7 @@ fn main() {
     }
 
     // Read chamber items
-    let chambers_with_items: Vec<usize> = (0..k).map(|_| read_input::<usize>()[0]).collect();
+    let chambers_with_items: HashSet<usize> = (0..k).map(|_| read_input::<usize>()[0]).collect();
 
     // Build the tree
     let mut tree = HashMap::new();
@@ -67,25 +73,10 @@ fn main() {
         tree.entry(passageway.b).or_insert_with(Vec::new).push((passageway.a, passageway.m));
     }
 
-    println!("{:?}", tree);
-    println!("{:?}", chambers_with_items);
-
     // // Perform DFS to find the minimum magic points required
     let min_magic_points = dfs(1, 0, &tree, &chambers_with_items);
 
-    println!("{}", min_magic_points);
-
-    // // Since we're returning back to the starting chamber (1), we need to subtract the magic points
-    // // used to enter the chambers_with_items for the first time.
-    // for item_chamber in &chambers_with_items {
-    //     min_magic_points -= tree.get(item_chamber).unwrap().iter().find(|&&(n, _)| n == 1).unwrap().1;
-    // }
-
-    // // Since we will enter and exit each chamber with an item once, we need to multiply the total by 2.
-    // min_magic_points *= 2;
-
-    // // Print the minimum magic points required
-    // println!("{}", min_magic_points);
+    println!("{}", min_magic_points.0);
 }
 
 
