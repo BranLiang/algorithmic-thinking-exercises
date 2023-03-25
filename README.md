@@ -10,6 +10,7 @@
 ## Trees and recursion
 - [04 Halloween haul](https://dmoj.ca/problem/dwite12c1p4)
 - [05 Countdown](https://dmoj.ca/problem/ecna05b)
+- [39 CCC '13 S3 - Chances of Winning](https://dmoj.ca/problem/ccc13s3)
 
 ## Memorization and dynamic programming
 - [06 Homer Simpson](https://onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1406)
@@ -58,5 +59,3 @@
 - [34 Srednji](https://dmoj.ca/problem/coci07c1p5)
 
 ## Uncategorized
-
-- [39 CCC '13 S3 - Chances of Winning](https://dmoj.ca/problem/ccc13s3)
