@@ -59,7 +59,10 @@ fn explore(
 ) -> usize {
     if index == remaining_games.len() {
         let fav_team_points = points[favorite_team as usize - 1];
-        return if points.into_iter().all(|p| p <= fav_team_points) { 1 } else { 0 };
+        return if points
+            .into_iter()
+            .enumerate()
+            .any(|(i, p)| p >= fav_team_points && i != favorite_team as usize - 1 ) { 0 } else { 1 };
     }
 
     let (team_a, team_b) = remaining_games[index];
