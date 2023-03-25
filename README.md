@@ -31,12 +31,14 @@
 - [13 Mice maze](https://onlinejudge.org/index.php?option=onlinejudge&Itemid=8&page=show_problem&problem=3553)
 - [14 Grandma planner](https://dmoj.ca/problem/saco08p3)
 - [27 Third Place](https://dmoj.ca/problem/dmopc17c4p3)
+- [38 WC '16 Contest 1 S2 - Alucard's Quest](https://dmoj.ca/problem/wc16c1s2)
 
 ## Binary search
 - [15 Feeding ants](https://dmoj.ca/problem/coci14c4p4)
 - [16 River jump](http://poj.org/problem?id=3258)
 - [17 Living quality](https://dmoj.ca/problem/ioi10p3)
 - [18 Cave doors](https://dmoj.ca/problem/ioi13p4)
+- [37 WC '98 P3 - Do or Do Not](https://dmoj.ca/problem/wc98p3)
 
 ## Heaps and segment trees
 - [19 Supermarket promotion](https://www.spoj.com/problems/PRO/)
@@ -57,6 +59,4 @@
 
 ## Uncategorized
 
-implement z-algorithm using two strings
-
-- [37 WC '98 P3 - Do or Do Not](https://dmoj.ca/problem/wc98p3)
+- [39 CCC '13 S3 - Chances of Winning](https://dmoj.ca/problem/ccc13s3)
