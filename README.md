@@ -59,3 +59,5 @@
 - [34 Srednji](https://dmoj.ca/problem/coci07c1p5)
 
 ## Uncategorized
+
+- [40 Checkerboard Summation (Hard)](https://dmoj.ca/problem/checkerhard)
